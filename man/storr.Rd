@@ -27,10 +27,16 @@ are three in the package: \code{\link{driver_environment}} for
 ephemeral in-memory storage, \code{\link{driver_rds}} for
 serialised storage to disk and \code{\link{driver_redis_api}}
 which stores data in Redis but requires packages that are not on
-CRAN to function (ropensci/RedisAPI and one of ropensci/rrlite or
-richfitz/redux).  New drivers are relatively easy to add -- see
-the "drivers" vignette (\code{vignette("drivers",
-package="storr")}).
+CRAN to function
+(\href{https://github.com/ropensci/RedisAPI}{RedisAPI} and one of
+\href{https://github.com/ropensci/rrlite}{rrlite} or
+\href{https://github.com/richfitz/redux}{redux}).  New drivers are
+relatively easy to add -- see the "drivers" vignette
+(\code{vignette("drivers", package="storr")}).
+
+There are convenience functions (e.g.,
+\code{\link{storr_environment}} and \code{\link{storr_rds}}) that
+may be more convenient to use than this function.
 
 Once a storr has been made it provides a number of methods.
 Because storr uses \code{R6} (\code{\link{R6Class}}) objects, each
@@ -66,21 +72,17 @@ the action (get, set, del, list, import, export) will affect the
   \code{set(key, value, namespace = self$default_namespace, use_cache = TRUE)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{key}}{
-      The key name.  Can be any string.
+  \itemize{
+    \item{\code{key}:   The key name.  Can be any string.
     }
 
-    \item{\code{value}}{
-      Any R object to store.  The object will generally be serialised (this is not actually true for the environment storr) so only objects that would usually be expected to survive a \code{saveRDS}/\code{readRDS} roundtrip will work.  This excludes Rcpp modules objects, external pointers, etc.  But any "normal" R object will work fine.
+    \item{\code{value}:   Any R object to store.  The object will generally be serialised (this is not actually true for the environment storr) so only objects that would usually be expected to survive a \code{saveRDS}/\code{readRDS} roundtrip will work.  This excludes Rcpp modules objects, external pointers, etc.  But any "normal" R object will work fine.
     }
 
-    \item{\code{namespace}}{
-      An optional namespace.  By default the default namespace that the storr was created with will be used (by default that is "objects").  Different namespaces allow different types of objects to be stored without risk of names colliding.  Use of namespaces is optional, but if used they must be a string.
+    \item{\code{namespace}:   An optional namespace.  By default the default namespace that the storr was created with will be used (by default that is "objects").  Different namespaces allow different types of objects to be stored without risk of names colliding.  Use of namespaces is optional, but if used they must be a string.
     }
 
-    \item{\code{use_cache}}{
-      Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 
@@ -94,38 +96,32 @@ the action (get, set, del, list, import, export) will affect the
   \code{set_by_value(value, namespace = self$default_namespace, use_cache = TRUE)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{value}}{
-      An R object to save, with the same limitations as \code{set}.
+  \itemize{
+    \item{\code{value}:   An R object to save, with the same limitations as \code{set}.
     }
 
-    \item{\code{namespace}}{
-      Optional namespace to save the key into.
+    \item{\code{namespace}:   Optional namespace to save the key into.
     }
 
-    \item{\code{use_cache}}{
-      Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 }
 \item{\code{get}}{
-  Retrieve an object from the storr.  If the requested value is not found thena \code{KeyError} will be raised (an R error, but can be caught with \code{tryCatch}.  See the "storr" vignette.
+  Retrieve an object from the storr.  If the requested value is not found then a \code{KeyError} will be raised (an R error, but can be caught with \code{tryCatch}; see the "storr" vignette).
 
   \emph{Usage:}
   \code{get(key, namespace = self$default_namespace, use_cache = TRUE)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{key}}{
-      The name of the key to get.
+  \itemize{
+    \item{\code{key}:   The name of the key to get.
     }
 
-    \item{\code{namespace}}{
-      Optional namespace to look for the key within.
+    \item{\code{namespace}:   Optional namespace to look for the key within.
     }
 
-    \item{\code{use_cache}}{
-      Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 }
@@ -136,13 +132,11 @@ the action (get, set, del, list, import, export) will affect the
   \code{get_hash(key, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{key}}{
-      The name of the key to get.
+  \itemize{
+    \item{\code{key}:   The name of the key to get.
     }
 
-    \item{\code{namespace}}{
-      Optional namespace to look for the key within.
+    \item{\code{namespace}:   Optional namespace to look for the key within.
     }
   }
 }
@@ -153,13 +147,11 @@ the action (get, set, del, list, import, export) will affect the
   \code{del(key, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{key}}{
-      The name of the key
+  \itemize{
+    \item{\code{key}:   The name of the key
     }
 
-    \item{\code{namespace}}{
-      The namespace of the key.
+    \item{\code{namespace}:   The namespace of the key.
     }
   }
 
@@ -167,15 +159,14 @@ the action (get, set, del, list, import, export) will affect the
   \code{TRUE} if an object was deleted, \code{FALSE} otherwise.
 }
 \item{\code{clear}}{
-  Clear a storr.  This function might be slow as it will iterate over each key.  Future versions of storr might allow drivers to implement a clear method that will allow faster clearing.
+  Clear a storr.  This function might be slow as it will iterate over each key.  Future versions of storr might allow drivers to implement a bulk clear method that will allow faster clearing.
 
   \emph{Usage:}
   \code{clear(namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{namespace}}{
-      A namespace, to clear a single namespace, or \code{NULL} to clear all namespaces.
+  \itemize{
+    \item{\code{namespace}:   A namespace, to clear a single namespace, or \code{NULL} to clear all namespaces.
     }
   }
 }
@@ -186,26 +177,23 @@ the action (get, set, del, list, import, export) will affect the
   \code{exists(key, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{key}}{
-      The name of the key
+  \itemize{
+    \item{\code{key}:   The name of the key
     }
 
-    \item{\code{namespace}}{
-      The namespace of the key.
+    \item{\code{namespace}:   The namespace of the key.
     }
   }
 }
-\item{\code{exists_hash}}{
-  Test if a hash exists within the storr
+\item{\code{exists_object}}{
+  Test if an object with a given hash exists within the storr
 
   \emph{Usage:}
-  \code{exists_hash(hash)}
+  \code{exists_object(hash)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{hash}}{
-      Hash to tes
+  \itemize{
+    \item{\code{hash}:   Hash to test
     }
   }
 }
@@ -222,13 +210,11 @@ the action (get, set, del, list, import, export) will affect the
   \code{get_value(hash, use_cache = TRUE)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{hash}}{
-      The hash of the object to retrieve.
+  \itemize{
+    \item{\code{hash}:   The hash of the object to retrieve.
     }
 
-    \item{\code{use_cache}}{
-      Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 
@@ -236,19 +222,17 @@ the action (get, set, del, list, import, export) will affect the
   The object if it is present, otherwise throw a \code{HashError}.
 }
 \item{\code{set_value}}{
-  Set a hash to a value.  You will not need to use this very often, but it is used internally.
+  Add an object value, but don't add a key.  You will not need to use this very often, but it is used internally.
 
   \emph{Usage:}
   \code{set_value(value, use_cache = TRUE)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{value}}{
-      An R object to set.
+  \itemize{
+    \item{\code{value}:   An R object to set.
     }
 
-    \item{\code{use_cache}}{
-      Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 
@@ -262,9 +246,8 @@ the action (get, set, del, list, import, export) will affect the
   \code{list(namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{namespace}}{
-      The namespace to list keys within.
+  \itemize{
+    \item{\code{namespace}:   The namespace to list keys within.
     }
   }
 
@@ -296,17 +279,14 @@ the action (get, set, del, list, import, export) will affect the
   \code{import(src, list = NULL, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{src}}{
-      Object to import objects from; can be a list, environment or another storr.
+  \itemize{
+    \item{\code{src}:   Object to import objects from; can be a list, environment or another storr.
     }
 
-    \item{\code{list}}{
-      Names of of objects to import (or \code{NULL} to import all objects in \code{envir}.  If given it must be a character vector.  If named, the names of the character vector will be the names of the objects as created in the storr.
+    \item{\code{list}:   Names of of objects to import (or \code{NULL} to import all objects in \code{envir}.  If given it must be a character vector.  If named, the names of the character vector will be the names of the objects as created in the storr.
     }
 
-    \item{\code{namespace}}{
-      Namespace to get objects from, and to put objects into.
+    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.
     }
   }
 }
@@ -317,17 +297,14 @@ the action (get, set, del, list, import, export) will affect the
   \code{export(dest, list = NULL, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{dest}}{
-      A target destination to export objects to; can be a list, environment, or another storr.  Use \code{list()} to export to a brand new list, or use \code{as.list(object)} for a shorthand.
+  \itemize{
+    \item{\code{dest}:   A target destination to export objects to; can be a list, environment, or another storr.  Use \code{list()} to export to a brand new list, or use \code{as.list(object)} for a shorthand.
     }
 
-    \item{\code{list}}{
-      Names of objects to export, with the same rules as \code{list} in \code{$import}.
+    \item{\code{list}:   Names of objects to export, with the same rules as \code{list} in \code{$import}.
     }
 
-    \item{\code{namespace}}{
-      Namespace to get objects from, and to put objects into.
+    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.
     }
   }
 
@@ -341,17 +318,14 @@ the action (get, set, del, list, import, export) will affect the
   \code{archive_export(path, names = NULL, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{path}}{
-      Path to create the storr at; can exist already.
+  \itemize{
+    \item{\code{path}:   Path to create the storr at; can exist already.
     }
 
-    \item{\code{names}}{
-      As for \code{$export}
+    \item{\code{names}:   As for \code{$export}
     }
 
-    \item{\code{namespace}}{
-      Namespace to get objects from.
+    \item{\code{namespace}:   Namespace to get objects from.
     }
   }
 }
@@ -362,17 +336,14 @@ the action (get, set, del, list, import, export) will affect the
   \code{archive_import(path, names = NULL, namespace = self$default_namespace)}
 
   \emph{Arguments:}
-  \describe{
-    \item{\code{path}}{
-      Path of the exported storr.
+  \itemize{
+    \item{\code{path}:   Path of the exported storr.
     }
 
-    \item{\code{names}}{
-      As for \code{$import}
+    \item{\code{names}:   As for \code{$import}
     }
 
-    \item{\code{namespace}}{
-      Namespace to import objects into.
+    \item{\code{namespace}:   Namespace to import objects into.
     }
   }
 }

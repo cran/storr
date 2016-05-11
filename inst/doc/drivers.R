@@ -42,7 +42,7 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
 
     ## On initialisation we'll create the two tables but only if they
     ## do not exist.  We can enforce the constraint that hash must be
-    ## unique within tbl_data and key/`namespace pairs must be unique
+    ## unique within tbl_data and key/namespace pairs must be unique
     ## within tbl_keys.
     initialize=function(path, tbl_data, tbl_keys) {
       self$con <- DBI::dbConnect(RSQLite::SQLite(), path)
