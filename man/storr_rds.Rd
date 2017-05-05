@@ -5,10 +5,11 @@
 \alias{storr_rds}
 \title{rds object cache driver}
 \usage{
-storr_rds(path, compress = TRUE, mangle_key = NULL,
-  default_namespace = "objects")
+storr_rds(path, compress = NULL, mangle_key = NULL, mangle_key_pad = NULL,
+  hash_algorithm = NULL, default_namespace = "objects")
 
-driver_rds(path, compress = TRUE, mangle_key = NULL)
+driver_rds(path, compress = NULL, mangle_key = NULL,
+  mangle_key_pad = NULL, hash_algorithm = NULL)
 }
 \arguments{
 \item{path}{Path for the store.  \code{tempdir()} is a good choice
@@ -21,12 +22,26 @@ amount of space for a reasonable amount of time.}
 \item{mangle_key}{Mangle keys?  If TRUE, then the key is encoded
 using base64 before saving to the filesystem.  See Details.}
 
+\item{mangle_key_pad}{Logical indicating if the filenames created
+when using \code{mangle_key} should also be "padded" with the
+\code{=} character to make up a round number of bytes.  Padding
+is required to satisfy the document that describes base64
+encoding (RFC 4648) but can cause problems in some applications
+(see \href{https://github.com/richfitz/storr/issues/43}{this
+issue}.  The default is to not pad \emph{new} storr archives.
+This should be generally safe to leave alone.}
+
+\item{hash_algorithm}{Name of the hash algorithm to use.  Possible
+values are "md5", "sha1", and others supported by
+\code{\link{digest}}.  If not given, then we will default to
+"md5".}
+
 \item{default_namespace}{Default namespace (see
 \code{\link{storr}}).}
 }
 \description{
 Object cache driver that saves objects using R's native
-serialised file format (see \code{\link{saveRDS}}) on the
+serialized file format (see \code{\link{saveRDS}}) on the
 filesystem.
 }
 \details{
@@ -46,7 +61,7 @@ so needs to contain characters that are valid in a filename.
 Because the actual file will be stored with mangled names it is
 not safe to use the same path for a storr with and without
 mangling.  So once an rds storr has been created its "mangledness"
-is set.  Using \code{mangle_key=NULL} uses whatever mangledness
+is set.  Using \code{mangle_key = NULL} uses whatever mangledness
 exists (or no mangledness if creating a new storr).
 }
 \examples{
@@ -69,7 +84,7 @@ st$set("foo/bar", letters)
 
 # The solution to this is to "mangle" the key names.  Storr can do
 # this for you:
-st2 <- storr_rds(tempfile(), mangle_key=TRUE)
+st2 <- storr_rds(tempfile(), mangle_key = TRUE)
 st2$set("foo/bar", letters)
 st2$list()
 st2$get("foo/bar")

@@ -16,12 +16,14 @@
 ## built-in tests in the package to ensure that the driver behaves
 ## correctly, and infrastructure to help with running those tests.
 
-## To demonstrate we'll write a wrapper around RSQLite to store data.
+## To demonstrate we'll write a wrapper around RSQLite to store data
+## (NOTE: this has since been rolled into the package as an actual
+## driver `driver_dbi` but I'm leaving it here for posterity).
 
 ## # How it works and what we need
 
 ## First, consider the `get` method in storr.  With a driver `dr`,
-## storr retrieves values by running:
+## storr retrieves values by running (approximately):
 
 ## ```r
 ## dr$exists_hash(key, namespace)
@@ -38,9 +40,9 @@
 ## 3. checks that the hash is actually present in the database
 ## 4. retrieves the object stored against the hash
 ##
-## hashes are stored as strings, while objects are *serialised R
+## hashes are stored as strings, while objects are *serialized R
 ## objects*, usually stored in binary.  The driver is responsible for
-## serialisation/deserialisation as that will depend on the properties
+## serialization/deserialization as that will depend on the properties
 ## of the driver.
 ##
 ## storr will take care of throwing appropriate errors if the object
@@ -62,7 +64,7 @@
 ## then the object has already been stored -- because saving the
 ## actual data is likely to be the slowest part it's worth avoiding).
 ##
-## 1. if the hash is not present, save the (serialised) object against
+## 1. if the hash is not present, save the (serialized) object against
 ## the hash.
 ## 2. store the hash against the key and namespace.
 
@@ -77,8 +79,13 @@
 ## interfaces that support first class key/value (`hstore`) which
 ## would be prefereable to this.
 
-## The details come from
-## [here](http://jfaganuk.github.io/2015/01/12/storing-r-objects-in-sqlite-tables/), but this is likely to change with the new work coming soon (see below).
+## The appropriate interface here is currently in flux with breaking
+## changes altering the interface in DBI/RSQLite so there are _two_
+## ways of doing this; one for versions of RSQLite up to 1.0.0, and
+## another for larger versions.  To make this package work on CRAN,
+## both versions are presented here, but hopefully the approach is
+## still clear enough.
+old_sqlite <- packageVersion("RSQLite") <= package_version("1.0.0")
 
 ## Start with a SQLite connection (similar things can be done with
 ## other DBI drivers but at present this uses one SQLite-only function
@@ -90,32 +97,33 @@ table <- "mydata"
 sql <- c(sprintf("CREATE TABLE IF NOT EXISTS %s", table),
          "(name string PRIMARY KEY,",
          "value blob)")
-DBI::dbGetQuery(con, paste(sql, collapse=" "))
+DBI::dbExecute(con, paste(sql, collapse=" "))
 
-## Then take an object, serialise it, and stuff it into the blob:
+## Then take an object, serialize it, and stuff it into the blob, then
+## insert that into the table.  This is the part that varies between
+## versions.
+
+## For both versions, we'll store the *value* of `mtcars` with the
+## *name* `"mtcars"`:
 value <- mtcars
 name <- "mtcars"
-
-dat <- data.frame(name=name,
-                  value=I(list(serialize(value, NULL))),
-                  stringsAsFactors=FALSE)
 sql <- sprintf("INSERT into %s (name, value) values (:name, :value)", table)
-RSQLite::dbGetPreparedQuery(con, sql, bind.data=dat)
 
-## The complicated bit here is using the `RSQLite::dbGetPreparedQuery`
-## to inject the raw byte sequence of the serialised object into the
-## `value` column (note that this is not a `DBI` function).
-## I believe that similar approaches are possible in other DBI
-## drivers.  With the new development version of DBI/RSQLite this will
-## change to using `DBI::dbBind`:
+if (old_sqlite) {
+  dat <- data.frame(name=name,
+                    value=I(list(serialize(value, NULL))),
+                    stringsAsFactors=FALSE)
+  RSQLite::dbGetPreparedQuery(con, sql, bind.data=dat)
+} else {
+  dat <- list(name=name, value=list(serialize(value, NULL)))
+  DBI::dbExecute(con, sql, dat)
+}
 
-## ```{r, eval=FALSE}
-## DBI::dbGetQuery(con, sql, bind.data=dat)
-## ```
-
-## which is great because it means that the driver below would work
-## for other DBI-compliant backends (development versions of RPostgres
-## and RMySQL at least).
+## The pattern here is to use `dbExecute` to create and execute the
+## query, injecting the raw byte sequence of the serialized object
+## into the `value` column.  This is currently supported only for
+## RSQLite in the current release, but will probably be supported by
+## other DBI-compatible packages over time.
 
 ## We can retrieve the data by name:
 sql <- sprintf('SELECT value FROM %s WHERE name == "%s"', table, name)
@@ -128,7 +136,7 @@ identical(x, value)
 ## driver is an R6 object, we construct it using a plain R function
 ## (not the `$new()` method of an R6 generator.  This is because the
 ## driver *could* be implemented as a function that generates a list
-## of closures or a reference class.
+## of closures, a reference class, or some other approach.
 
 ## There are quite a few required functions to implement.  Below, the
 ## value in parentheses after the function signature is the expected
@@ -149,10 +157,10 @@ identical(x, value)
 
 ## * `set_object(hash, value)` (returns NULL): Given a string `hash`
 ##   and an arbitrary object `value`, store the object against the
-##   hash.  Serialisation will likely be needed here (e.g.,
+##   hash.  Serialization will likely be needed here (e.g.,
 ##   `serialize(value, NULL)`).
 ## * `get_object(hash)` (returns object): Given a string `hash` return
-##   the R object stored against it.  Deserialisation will likely be
+##   the R object stored against it.  Deserialization will likely be
 ##   needed here (e.g., `unserialize(dat)`)
 
 ## * `exists_hash(key, namespace)` (returns logical): Given strings
@@ -180,21 +188,27 @@ identical(x, value)
 
 ## The arguments to the constructor will be
 ##
-## * `path`: Path to the SQLite database
+## * `con`: A `SQLiteConnection` object
 ## * `tbl_data`: Name of the table to store the data (hash/object pairs) in.
 ## * `tbl_keys`: Name of the table to store the keys
 ##   (key/namespace/hash triplets) in.
+
+## Taking a `SQLiteConnection` object, rather than a path, saves
+## duplicating the SQLite constructor function.
+
+## In addition, some care is required with the `hash_algorithm`
+## argument -- see below.
 
 ## The SQL queries are a bit ugly but hopefully straightforward enough
 ## to follow.
 
 driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
-  .R6_driver_sqlite$new(path, tbl_data, tbl_keys)
+  R6_driver_sqlite$new(path, tbl_data, tbl_keys)
 }
 
 ## The R6 class definition that implements the functions above, with a
 ## little commentry throughout.
-.R6_driver_sqlite <- R6::R6Class(
+R6_driver_sqlite <- R6::R6Class(
   "driver_sqlite",
   public=list(
     ## Public data members
@@ -206,22 +220,22 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
     ## do not exist.  We can enforce the constraint that hash must be
     ## unique within tbl_data and key/namespace pairs must be unique
     ## within tbl_keys.
-    initialize=function(path, tbl_data, tbl_keys) {
-      self$con <- DBI::dbConnect(RSQLite::SQLite(), path)
+    initialize=function(con, tbl_data, tbl_keys) {
+      self$con <- con
       self$tbl_data <- tbl_data
       self$tbl_keys <- tbl_keys
 
       sql <- c(sprintf("CREATE TABLE if NOT EXISTS %s", tbl_data),
                "(hash string PRIMARY KEY NOT NULL,",
                "value blob NOT NULL)")
-      DBI::dbGetQuery(self$con, paste(sql, collapse=" "))
+      DBI::dbExecute(self$con, paste(sql, collapse=" "))
 
       sql <- c(sprintf("CREATE TABLE IF NOT EXISTS %s", tbl_keys),
                "(namespace string NOT NULL,",
                "key string NOT NULL,",
                "hash string NOT NULL,",
                "PRIMARY KEY (namespace, key))")
-      DBI::dbGetQuery(self$con, paste(sql, collapse=" "))
+      DBI::dbExecute(self$con, paste(sql, collapse=" "))
     },
 
     ## This is purely for identification later.
@@ -249,10 +263,10 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
       sql <- c(sprintf("INSERT OR REPLACE INTO %s", self$tbl_keys),
                sprintf('(namespace, key, hash) VALUES ("%s", "%s", "%s")',
                        namespace, key, hash))
-      DBI::dbGetQuery(self$con, paste(sql, collapse=" "))
+      DBI::dbExecute(self$con, paste(sql, collapse=" "))
     },
 
-    ## Return a (deserialised) R object, given a hash
+    ## Return a (deserialized) R object, given a hash
     get_object=function(hash) {
       sql <- c(sprintf("SELECT value FROM %s", self$tbl_data),
                sprintf('WHERE hash = "%s"', hash))
@@ -260,18 +274,22 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
       unserialize(value[[1]])
     },
 
-    ## Set a (serialised) R object against a hash.  This would be
+    ## Set a (serialized) R object against a hash.  This would be
     ## considerably simpler (but probably slower and less accurate) if we
-    ## serialised to string with:
+    ## serialized to string with:
     ##   rawToChar(serialize(value, NULL, TRUE))
     set_object=function(hash, value) {
-      dat <- data.frame(hash=hash,
-                        value=I(list(serialize(value, NULL))),
-                        stringsAsFactors=FALSE)
-      sql <- c(sprintf("INSERT OR REPLACE INTO %s", self$tbl_data),
-               "(hash, value) VALUES (:hash, :value)")
-      RSQLite::dbGetPreparedQuery(self$con, paste(sql, collapse=" "),
-                                  bind.data=dat)
+      sql <- paste(sprintf("INSERT OR REPLACE INTO %s", self$tbl_data),
+                   "(hash, value) VALUES (:hash, :value)")
+      if (old_sqlite) {
+        dat <- data.frame(hash=hash,
+                          value=I(list(serialize(value, NULL))),
+                          stringsAsFactors=FALSE)
+        RSQLite::dbGetPreparedQuery(self$con, sql, bind.data=dat)
+      } else {
+        dat <- list(hash=hash, value=list(serialize(value, NULL)))
+        DBI::dbExecute(self$con, sql, dat)
+      }
     },
 
     ## Check if a key/namespace pair exists.
@@ -294,7 +312,7 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
       if (self$exists_hash(key, namespace)) {
         sql <- sprintf('DELETE FROM %s WHERE namespace = "%s" AND key = "%s"',
                        self$tbl_keys, namespace, key)
-        DBI::dbGetQuery(self$con, sql)
+        DBI::dbExecute(self$con, sql)
         TRUE
       } else {
         FALSE
@@ -304,7 +322,7 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
     del_object=function(hash) {
       if (self$exists_object(hash)) {
         sql <- sprintf('DELETE FROM %s WHERE hash = "%s"', self$tbl_data, hash)
-        DBI::dbGetQuery(self$con, sql)
+        DBI::dbExecute(self$con, sql)
         TRUE
       } else {
         FALSE
@@ -329,7 +347,8 @@ driver_sqlite <- function(path, tbl_data="storr_data", tbl_keys="storr_keys") {
   ))
 
 ## Next, let's give the driver a little workout.
-dr <- driver_sqlite(":memory:")
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+dr <- driver_sqlite(con)
 
 ## Start with the hash part of the database.  At first we have no
 ## hashes in the database:
@@ -379,22 +398,36 @@ dr$list_keys(namespace)
 ## OK, so this *seems* to be working.  But how do we test if it is
 ## actually working?  `storr` provides an automatic testing facility
 ## based on `testthat`.
-storr::test_driver(function() driver_sqlite(":memory:"))
 
-## The argument a function that generates a database that we are
-## allowed to write anything to and then destroy when complete.  So
-## `:memory:` is a good path here!
+## To do this, we provide a function that takes one argument `dr`; if
+## this is `NULL` then we must create a new empty driver, if
+## non-`NULL` we must create a driver pointing at the same storage as
+## an existing driver `dr`:
+create_sqlite <- function(dr = NULL) {
+  if (is.null(dr)) {
+    con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+  } else {
+    con <- dr$con
+  }
+  driver_sqlite(con)
+}
+
+## (because this function will repeatedly create new databases,
+## `:memory:` is a good path here)!
+
+## Pass this in to `storr::test_driver`
+storr::test_driver(create_sqlite)
 
 ## Now that the driver works, we can write the wrapper function:
-storr_sqlite <- function(path,
+storr_sqlite <- function(con,
                          tbl_data="storr_data", tbl_keys="storr_keys",
                          default_namespace="objects") {
-  storr::storr(driver_sqlite(path, tbl_data, tbl_keys),
+  storr::storr(driver_sqlite(con, tbl_data, tbl_keys),
                default_namespace)
 }
 
 ## and construct a `storr` with it:
-st_sql <- storr_sqlite(":memory:")
+st_sql <- storr_sqlite(DBI::dbConnect(RSQLite::SQLite(), ":memory:"))
 
 ## Nothing in the storr:
 st_sql$list()
@@ -417,17 +450,6 @@ st_sql$get_value(st_sql$list_hashes())
 st_sql$gc()
 st_sql$list_hashes()
 
-## As implemented (totally naively) above, this driver is quite a bit
-## slower than the rds driver (which is ~= the same speed as the redis
-## driver)
-st_rds <- storr::storr_rds(tempfile())
-microbenchmark::microbenchmark(
-  st_sql$set(key, runif(10), use_cache=FALSE),
-  st_rds$set(key, runif(10), use_cache=FALSE))
-
-microbenchmark::microbenchmark(
-  st_sql$get(key, use_cache=FALSE),
-  st_rds$get(key, use_cache=FALSE))
 
 st_sql$destroy()
 st_rds$destroy()

@@ -23,16 +23,14 @@ underlying storage driver is slow.
 }
 \details{
 To create a storr you need to provide a "driver" object.  There
-are three in the package: \code{\link{driver_environment}} for
+are four in the package: \code{\link{driver_environment}} for
 ephemeral in-memory storage, \code{\link{driver_rds}} for
-serialised storage to disk and \code{\link{driver_redis_api}}
-which stores data in Redis but requires packages that are not on
-CRAN to function
-(\href{https://github.com/ropensci/RedisAPI}{RedisAPI} and one of
-\href{https://github.com/ropensci/rrlite}{rrlite} or
-\href{https://github.com/richfitz/redux}{redux}).  New drivers are
-relatively easy to add -- see the "drivers" vignette
-(\code{vignette("drivers", package="storr")}).
+serialized storage to disk, \code{\link{driver_dbi}} for use with
+DBI-compliant database interfaces, and
+\code{\link{driver_redis_api}} which stores data in Redis but
+requires packages that are not on CRAN to function
+(\href{https://github.com/ropensci/rrlite}{rrlite} or
+\href{https://github.com/richfitz/redux}{redux})
 
 There are convenience functions (e.g.,
 \code{\link{storr_environment}} and \code{\link{storr_rds}}) that
@@ -76,7 +74,7 @@ the action (get, set, del, list, import, export) will affect the
     \item{\code{key}:   The key name.  Can be any string.
     }
 
-    \item{\code{value}:   Any R object to store.  The object will generally be serialised (this is not actually true for the environment storr) so only objects that would usually be expected to survive a \code{saveRDS}/\code{readRDS} roundtrip will work.  This excludes Rcpp modules objects, external pointers, etc.  But any "normal" R object will work fine.
+    \item{\code{value}:   Any R object to store.  The object will generally be serialized (this is not actually true for the environment storr) so only objects that would usually be expected to survive a \code{saveRDS}/\code{readRDS} roundtrip will work.  This excludes Rcpp modules objects, external pointers, etc.  But any "normal" R object will work fine.
     }
 
     \item{\code{namespace}:   An optional namespace.  By default the default namespace that the storr was created with will be used (by default that is "objects").  Different namespaces allow different types of objects to be stored without risk of names colliding.  Use of namespaces is optional, but if used they must be a string.
@@ -148,7 +146,7 @@ the action (get, set, del, list, import, export) will affect the
 
   \emph{Arguments:}
   \itemize{
-    \item{\code{key}:   The name of the key
+    \item{\code{key}:   A vector of names of keys
     }
 
     \item{\code{namespace}:   The namespace of the key.
@@ -156,7 +154,7 @@ the action (get, set, del, list, import, export) will affect the
   }
 
   \emph{Value}:
-  \code{TRUE} if an object was deleted, \code{FALSE} otherwise.
+  A logical vector the same length as the recycled length of key/namespace, with each element being \code{TRUE} if an object was deleted, \code{FALSE} otherwise.
 }
 \item{\code{clear}}{
   Clear a storr.  This function might be slow as it will iterate over each key.  Future versions of storr might allow drivers to implement a bulk clear method that will allow faster clearing.
@@ -178,12 +176,15 @@ the action (get, set, del, list, import, export) will affect the
 
   \emph{Arguments:}
   \itemize{
-    \item{\code{key}:   The name of the key
+    \item{\code{key}:   A vector of names of keys
     }
 
     \item{\code{namespace}:   The namespace of the key.
     }
   }
+
+  \emph{Value}:
+  A logical vector the same length as the recycled length of key/namespace, with each element being \code{TRUE} if the object exists and \code{FALSE} otherwise.
 }
 \item{\code{exists_object}}{
   Test if an object with a given hash exists within the storr
@@ -194,6 +195,76 @@ the action (get, set, del, list, import, export) will affect the
   \emph{Arguments:}
   \itemize{
     \item{\code{hash}:   Hash to test
+    }
+  }
+}
+\item{\code{mset}}{
+  Set multiple elements at once
+
+  \emph{Usage:}
+  \code{mset(key, value, namespace = self$default_namespace, use_cache = TRUE)}
+
+  \emph{Arguments:}
+  \itemize{
+    \item{\code{key}:   A vector of keys to get; zero to many valid keys
+    }
+
+    \item{\code{value}:   A vector of values
+    }
+
+    \item{\code{namespace}:   A vector of namespaces (either a single namespace or a vector)
+    }
+
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    }
+  }
+
+  \emph{Details:}
+  The arguments \code{key} and \code{namespace} are recycled such that either can be given as a scalar if the other is a vector. Other recycling is not allowed.
+}
+\item{\code{mget}}{
+  Get multiple elements at once
+
+  \emph{Usage:}
+  \code{mget(key, namespace = self$default_namespace, use_cache = TRUE,
+      missing = NULL)}
+
+  \emph{Arguments:}
+  \itemize{
+    \item{\code{key}:   A vector of keys to get; zero to many valid keys
+    }
+
+    \item{\code{namespace}:   A vector of namespaces (either a single namespace or a vector)
+    }
+
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    }
+
+    \item{\code{missing}:   Value to use for missing elements; by default \code{NULL} will be used.  IF \code{NULL} is a value that you might have stored in the storr you might want to use a different value here to distinguish "missing" from "set to NULL".  In addition, the \code{missing} attribute will indicate which values were missing.
+    }
+  }
+
+  \emph{Details:}
+  The arguments \code{key} and \code{namespace} are recycled such that either can be given as a scalar if the other is a vector. Other recycling is not allowed.
+
+  \emph{Value}:
+  A list with a length of the recycled length of \code{key} and \code{namespace}.  If any elements are missing, then an attribute \code{missing} will indicate the elements that are missing (this will be an integer vector with the indices of values were not found in the storr).
+}
+\item{\code{mset_by_value}}{
+  Set multiple elements at once, by value.  A cross between \code{mset} and \code{set_by_value}.
+
+  \emph{Usage:}
+  \code{mset_by_value(value, namespace = self$default_namespace, use_cache = TRUE)}
+
+  \emph{Arguments:}
+  \itemize{
+    \item{\code{value}:   A list or vector of values to set into the storr.
+    }
+
+    \item{\code{namespace}:   A vector of namespaces
+    }
+
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
     }
   }
 }
@@ -239,6 +310,21 @@ the action (get, set, del, list, import, export) will affect the
   \emph{Value}:
   Invisibly, the hash of the object.
 }
+\item{\code{mset_value}}{
+  Add a vector of object values, but don't add keys.  You will not need to use this very often, but it is used internally.
+
+  \emph{Usage:}
+  \code{mset_value(values, use_cache = TRUE)}
+
+  \emph{Arguments:}
+  \itemize{
+    \item{\code{values}:   A list of R objects to set
+    }
+
+    \item{\code{use_cache}:   Use the internal cache to avoid reading or writing to the underlying storage if the data has already been seen (i.e., we have seen the hash of the object before).
+    }
+  }
+}
 \item{\code{list}}{
   List all keys stored in a namespace.
 
@@ -276,7 +362,8 @@ the action (get, set, del, list, import, export) will affect the
   Import R objects from an environment.
 
   \emph{Usage:}
-  \code{import(src, list = NULL, namespace = self$default_namespace)}
+  \code{import(src, list = NULL, namespace = self$default_namespace,
+      skip_missing = FALSE)}
 
   \emph{Arguments:}
   \itemize{
@@ -286,7 +373,10 @@ the action (get, set, del, list, import, export) will affect the
     \item{\code{list}:   Names of of objects to import (or \code{NULL} to import all objects in \code{envir}.  If given it must be a character vector.  If named, the names of the character vector will be the names of the objects as created in the storr.
     }
 
-    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.
+    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.  If \code{NULL}, all namespaces from \code{src} will be imported. If named, then the same rule is followed as \code{list}; \code{namespace = c(a = b)} will import the contents of namespace \code{b} as namespace \code{a}.
+    }
+
+    \item{\code{skip_missing}:   Logical, indicating if missing keys (specified in \code{list}) should be skipped over, rather than being treated as an error (the default).
     }
   }
 }
@@ -294,7 +384,8 @@ the action (get, set, del, list, import, export) will affect the
   Export objects from the storr into something else.
 
   \emph{Usage:}
-  \code{export(dest, list = NULL, namespace = self$default_namespace)}
+  \code{export(dest, list = NULL, namespace = self$default_namespace,
+      skip_missing = FALSE)}
 
   \emph{Arguments:}
   \itemize{
@@ -304,18 +395,21 @@ the action (get, set, del, list, import, export) will affect the
     \item{\code{list}:   Names of objects to export, with the same rules as \code{list} in \code{$import}.
     }
 
-    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.
+    \item{\code{namespace}:   Namespace to get objects from, and to put objects into.  If \code{NULL}, then this will export namespaces from this (source) storr into the destination; if there is more than one namespace,this is only possible if \code{dest} is a storr (otherwise there will be an error).
+    }
+
+    \item{\code{skip_missing}:   Logical, indicating if missing keys (specified in \code{list}) should be skipped over, rather than being treated as an error (the default).
     }
   }
 
   \emph{Value}:
-  Invisibly, \code{dest}, which allows use of \code{e <- st$export(new.env())}.
+  Invisibly, \code{dest}, which allows use of \code{e <- st$export(new.env())} and \code{x <- st$export(list())}.
 }
 \item{\code{archive_export}}{
   Export objects from the storr into a special "archive" storr, which is an \code{\link{storr_rds}} with name mangling turned on (which encodes keys with base64 so that they do not voilate filesystem naming conventions).
 
   \emph{Usage:}
-  \code{archive_export(path, names = NULL, namespace = self$default_namespace)}
+  \code{archive_export(path, names = NULL, namespace = NULL)}
 
   \emph{Arguments:}
   \itemize{
@@ -325,7 +419,7 @@ the action (get, set, del, list, import, export) will affect the
     \item{\code{names}:   As for \code{$export}
     }
 
-    \item{\code{namespace}:   Namespace to get objects from.
+    \item{\code{namespace}:   Namespace to get objects from.  If \code{NULL}, then exports all namespaces found in this (source) storr.
     }
   }
 }
@@ -333,7 +427,7 @@ the action (get, set, del, list, import, export) will affect the
   Inverse of \code{archive_export}; import objects from a storr that was created by \code{archive_export}.
 
   \emph{Usage:}
-  \code{archive_import(path, names = NULL, namespace = self$default_namespace)}
+  \code{archive_import(path, names = NULL, namespace = NULL)}
 
   \emph{Arguments:}
   \itemize{
@@ -343,7 +437,7 @@ the action (get, set, del, list, import, export) will affect the
     \item{\code{names}:   As for \code{$import}
     }
 
-    \item{\code{namespace}:   Namespace to import objects into.
+    \item{\code{namespace}:   Namespace to import objects into.  If \code{NULL}, then imports al namespaces from the source storr.
     }
   }
 }
@@ -374,7 +468,7 @@ st$del("mykey")
 ## not "objects" by using the \\code{default_namespace} argument (this
 ## one also points at the same memory as the first storr).
 st2 <- storr(driver_environment(st$driver$envir),
-             default_namespace="namespace2")
+             default_namespace = "namespace2")
 ## All functions now use "namespace2" as the default namespace:
 st2$list()
 st2$del("x")

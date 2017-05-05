@@ -8,12 +8,11 @@ testthat::test_that("simple", {
   on.exit(dr$destroy())
 
   path <- tempfile()
-  on.exit(unlink(path, recursive=TRUE), add=TRUE)
+  on.exit(unlink(path, recursive = TRUE), add = TRUE)
 
   ## Set up some data:
   dat <- "aaa"
   key <- "a"
-  hash <- hash_object(dat)
   ns <- "objects"
 
   dir.create(path)
@@ -27,6 +26,8 @@ testthat::test_that("simple", {
   testthat::expect_is(st, "storr")
   testthat::expect_is(st, "storr_external")
 
+  hash <- st$hash_object(dat)
+
   testthat::expect_false(st$driver$exists_hash(key, ns))
   testthat::expect_false(st$driver$exists_object(hash))
 
@@ -36,7 +37,7 @@ testthat::test_that("simple", {
   testthat::expect_identical(st$list(ns), character(0))
 
   d <- st$get(key, ns)
-  testthat::expect_equal(d, dat, tolerance=1e-15)
+  testthat::expect_equal(d, dat, tolerance = 1e-15)
 
   testthat::expect_true(st$driver$exists_hash(key, ns))
   testthat::expect_true(st$driver$exists_object(hash))
@@ -56,5 +57,5 @@ testthat::test_that("simple", {
   testthat::expect_false(st$exists("z", ns))
   testthat::expect_error(suppressWarnings(st$get("z", ns)),
                          "key 'z' ('objects') not found, with error:",
-                         fixed=TRUE)
+                         fixed = TRUE)
 })

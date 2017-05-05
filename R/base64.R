@@ -6,6 +6,8 @@
 ##' @param x A string or vector of strings to encode/decode
 ##' @param char62 Character to use for the 62nd index
 ##' @param char63 Character to use for the 63rd index
+##' @param pad Logical, indicating if strings should be padded with
+##'   \code{=} characters (as RFC 4648 requires)
 ##' @export
 ##' @examples
 ##' x <- encode64("hello")
@@ -15,9 +17,9 @@
 ##' # Encoding things into filename-safe strings is the reason for
 ##' # this function:
 ##' encode64("unlikely/to be @ valid filename")
-encode64 <- function(x, char62="-", char63="_") {
+encode64 <- function(x, char62 = "-", char63 = "_", pad = TRUE) {
   if (length(x) != 1L) {
-    return(vcapply(x, encode64,char62, char63, USE.NAMES=FALSE))
+    return(vcapply(x, encode64, char62, char63, USE.NAMES = FALSE))
   }
   tr <- c(LETTERS, letters, 0:9, char62, char63)
   x <- as.integer(charToRaw(x))
@@ -38,16 +40,16 @@ encode64 <- function(x, char62="-", char63="_") {
   z <- tr[bitwAnd(y, 63L) + 1L]
   if (n_pad > 0) {
     len <- length(z)
-    z[(len - n_pad + 1):len] <- "="
+    z[(len - n_pad + 1):len] <- if (pad) "=" else ""
   }
-  paste0(z, collapse="")
+  paste0(z, collapse = "")
 }
 
 ##' @export
 ##' @rdname encode64
-decode64 <- function(x, char62="-", char63="_") {
+decode64 <- function(x, char62 = "-", char63 = "_") {
   if (length(x) != 1L) {
-    return(vcapply(x, decode64,char62, char63, USE.NAMES=FALSE))
+    return(vcapply(x, decode64, char62, char63, USE.NAMES = FALSE))
   }
   ## TODO: check that the string is correctly encoded before doing
   ## anything.
@@ -59,9 +61,7 @@ decode64 <- function(x, char62="-", char63="_") {
 
   n_byte <- length(y)
   n_block <- ceiling(n_byte / 4L)
-  nd_byte <- 3L * n_block
 
-  ## Hmm.
   y <- matrix(c(y, integer(4L * n_block - n_byte)), 4L, n_block)
   x <- matrix(integer(3 * n_block), 3, n_block)
   x[1L, ] <- bitwOr(bitwShiftL(y[1L, ], 2L), bitwShiftR(y[2L, ], 4L))

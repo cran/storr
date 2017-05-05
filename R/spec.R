@@ -7,7 +7,7 @@
 ##' to the test suite to guard against regressions.
 ##'
 ##' The test suite is included in the package as
-##' \code{system.file("spec", package="storr")}.
+##' \code{system.file("spec", package = "storr")}.
 ##'
 ##' The procedure for each test block is:
 ##' \enumerate{
@@ -21,41 +21,43 @@
 ##'
 ##' @title Test a storr driver
 ##'
-##' @param create A function with no arguments that when run will
-##'   create a new driver instance.  Depending on your storage model,
-##'   temporary directories, in-memory locations, or random-but-unique
-##'   prefixes may help create isolated locations for the test (the
-##'   tests assume that a storr created with \code{create} is entirely
-##'   empty).
+##' @param create A function with one arguments that when run with
+##'   \code{NULL} as the argument will create a new driver instance.
+##'   It will also be called with a driver (of the same type) as an
+##'   argument - in this case, you must create a new driver object
+##'   pointing at the same underlying storage (see the examples).
+##'   Depending on your storage model, temporary directories,
+##'   in-memory locations, or random-but-unique prefixes may help
+##'   create isolated locations for the test (the tests assume that a
+##'   storr created with \code{create} is entirely empty).
 ##'
 ##' @export
 ##' @examples
 ##' ## Testing the environment driver is nice and fast:
 ##' if (requireNamespace("testthat")) {
-##'   test_driver(function() driver_environment())
+##'   create_env <- function(dr = NULL, ...) {
+##'     driver_environment(dr$envir, ...)
+##'   }
+##'   test_driver(create_env)
 ##' }
 ##'
 ##' # To test things like the rds driver, I would run:
 ##' \dontrun{
 ##' if (requireNamespace("testthat")) {
-##'   test_driver(function() driver_rds(tempfile()))
+##'   create_rds <- function(dr = NULL) {
+##'     driver_rds(if (is.null(dr)) tempfile() else dr$path)
+##'   }
+##'   test_driver(create_rds)
 ##' }
 ##' }
 test_driver <- function(create) {
-  if (!(is.function(create) && length(formals(create)) == 0L)) {
-    stop("create must be a function of zero arguments")
-  }
   loadNamespace("testthat")
 
   reporter <- testthat::get_reporter()
   standalone <- inherits(reporter, "StopReporter")
   if (standalone) {
     old_reporter <- reporter
-    if (inherits(testthat::SummaryReporter, "refObjectGenerator")) {
-      reporter <- testthat::SummaryReporter()
-    } else {
-      reporter <- testthat::SummaryReporter$new()
-    }
+    reporter <- testthat::SummaryReporter$new()
     reporter$start_reporter()
     on.exit({
       reporter$end_reporter()
@@ -63,13 +65,13 @@ test_driver <- function(create) {
     })
   }
 
-  files <- dir(system.file("spec", package="storr"),
-               pattern="^test-", full.names=TRUE)
-  env <- new.env(parent=environment(test_driver))
+  files <- dir(system.file("spec", package = "storr"),
+               pattern = "^test-", full.names = TRUE)
+  env <- new.env(parent = environment(test_driver))
   env$.driver_name <- create()$type()
   env$.driver_create <- create
-  res <- lapply(files, testthat::test_file, env=env,
-                reporter=reporter, start_end_reporter=FALSE)
+  res <- lapply(files, testthat::test_file, env = env,
+                reporter = reporter, start_end_reporter = FALSE)
 
   if (standalone) {
     res <- do.call("rbind", lapply(res, as.data.frame))
@@ -82,7 +84,7 @@ test_driver <- function(create) {
                    nerr, ngettext(nerr, "error", "errors"),
                    nfail, ngettext(nfail, "failure", "failures"),
                    ntest)
-    if (ok) message(msg) else stop(msg, call.=FALSE)
+    if (ok) message(msg) else stop(msg, call. = FALSE)
     invisible(res)
   }
 }

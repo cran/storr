@@ -5,9 +5,10 @@
 \alias{storr_redis_api}
 \title{Redis object cache driver}
 \usage{
-storr_redis_api(prefix, con, default_namespace = "objects")
+storr_redis_api(prefix, con, hash_algorithm = NULL,
+  default_namespace = "objects")
 
-driver_redis_api(prefix, con)
+driver_redis_api(prefix, con, hash_algorithm = NULL)
 }
 \arguments{
 \item{prefix}{Prefix for keys.  We'll generate a number of keys
@@ -16,9 +17,12 @@ with a punctuation character (e.g., ":") will make created
 strings nicer to deal with.}
 
 \item{con}{A \code{redis_api} connection object, as created by the
-RedisAPI package.  This package does not actually provide the
-tools to create a connection; you need to provide one that is
-good to go.}
+redux or rrlite packages.}
+
+\item{hash_algorithm}{Name of the hash algorithm to use.  Possible
+values are "md5", "sha1", and others supported by
+\code{\link{digest}}.  If not given, then we will default to
+"md5".}
 
 \item{default_namespace}{Default namespace (see \code{\link{storr}}).}
 }
