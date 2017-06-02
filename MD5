@@ -1,8 +1,8 @@
-6d0dcc77f204cbe5c70b5d7139ec3782 *DESCRIPTION
+63efa53d59cc380df95c693926c984b1 *DESCRIPTION
 9b54442583e79726ef91aac0ba65505c *LICENSE
 0793717a1f4f180af06cf85ac0debb04 *NAMESPACE
 1ebc441e890f187aae2fa17f25e3c059 *NEWS.md
-20c883eb101b01e3477e3845e226eca0 *R/base64.R
+b29fabe9524a075e6cb390e51c4e988b *R/base64.R
 781a259aef923c49babfb856f7f45cdb *R/driver_dbi.R
 c15ed4db7106bf12527ea31f900fdba0 *R/driver_environment.R
 cd94cb15ac99792851079786094d1742 *R/driver_external.R
@@ -15,7 +15,7 @@ b22785f87792d9dd7521bb066a5e93f6 *R/driver_rds.R
 3501c813031c291f73b68c03bb6e32f7 *R/storr_copy.R
 978190aa5a73d506202477ac8d110dce *R/traits.R
 5138c8372cb701aa6e4871922843dbb8 *R/utils.R
-f18e229078c82ff9ea95fb7a0319b7af *README.md
+05bfc77f927684316b8f2996e91da91b *README.md
 bf40e72367a4364f70c17c575b938f10 *build/vignette.rds
 2871fb25bd15573ed7af2a2d10d0f79d *inst/doc/external.R
 3d6f479fa5286f1dee4af915ff91f52f *inst/doc/external.Rmd
@@ -37,14 +37,13 @@ be2f0032730c1d4bd2b3c799d0bff78e *man/storr_external.Rd
 1ebde5580ca7fb32ee317d19748f9269 *man/storr_redis_api.Rd
 f43c8d14c9d01e8d9908d2cf847a288a *man/test_driver.Rd
 ceead9a124afc013263d011c3e3312db *tests/testthat.R
-ea924874e3bf157d9aed4968e1cc5391 *tests/testthat/Rprof.out
 a920a653c1f4d306014948fe0b31f096 *tests/testthat/helper-storr.R
 e52c7be89dcc05dfb194c899371ff845 *tests/testthat/test-auto.R
-c8623b3ae85c638f57ec97f4e6752ecb *tests/testthat/test-base64.R
+7df7c8b5868e649bbe03a264b08a6666 *tests/testthat/test-base64.R
 31a28f156aac84e54308e91724835f2c *tests/testthat/test-copy.R
 98f23a862690f3abec86cbb88f0d647a *tests/testthat/test-driver-dbi.R
 a17e23a361e9ca08df4beb438be275e5 *tests/testthat/test-driver-environment.R
-6aa1ecbc0746798e120a1c46207b563f *tests/testthat/test-driver-rds.R
+fe294868f62ca182e7ff31c0043c0557 *tests/testthat/test-driver-rds.R
 5cf724560fbb7a136387ffec9045bcbe *tests/testthat/test-driver-redis-api.R
 31e3ad6a8cc03b74a5afd325d10f7e36 *tests/testthat/test-hash.R
 e8e9b31f3501b81f0dc6834a34ac2e5f *tests/testthat/test-spec.R
