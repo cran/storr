@@ -32,6 +32,7 @@ pg_tester <- function(ctor) {
 }
 
 test_that("dbi (postgres via RPostgres)", {
+  skip_on_cran()
   if (requireNamespace("RPostgres", quietly = TRUE)) {
     if (has_postgres(RPostgres::Postgres)) {
       storr::test_driver(pg_tester(RPostgres::Postgres))
@@ -40,6 +41,7 @@ test_that("dbi (postgres via RPostgres)", {
 })
 
 test_that("dbi (postgres via RPostgreSQL)", {
+  skip_on_cran()
   if (requireNamespace("RPostgreSQL", quietly = TRUE)) {
     oo <- options(warnPartialMatchArgs = FALSE)
     if (!is.null(oo$warnPartialMatchArgs)) {
@@ -50,17 +52,3 @@ test_that("dbi (postgres via RPostgreSQL)", {
     }
   }
 })
-
-## These are not required on CRAN testing, but only for my own
-## edification.
-if ("redux" %in% .packages(TRUE)) {
-  con <- redux::hiredis()
-  storr::test_driver(function(dr = NULL, ...)
-    driver_redis_api(dr$prefix %||% rand_str(), con, ...))
-}
-
-if ("rrlite" %in% .packages(TRUE)) {
-  con <- rrlite::hirlite()
-  storr::test_driver(function(dr = NULL, ...)
-    driver_redis_api(dr$prefix %||% rand_str(), con, ...))
-}

@@ -1,10 +1,10 @@
 Package: storr
 Title: Simple Key Value Stores
-Version: 1.1.1
+Version: 1.1.2
 Description: Creates and manages simple key-value stores.  These can
     use a variety of approaches for storing the data.  This package
-    implements the base methods and support for file system and
-    in-memory stores.
+    implements the base methods and support for file system, in-memory
+    and DBI-based database stores.
 Depends: R (>= 3.1.0)
 License: MIT + file LICENSE
 LazyData: true
@@ -16,8 +16,8 @@ Imports: R6 (>= 2.1.0), digest
 Suggests: DBI (>= 0.6), RSQLite (>= 1.1-2), knitr, mockr, rbenchmark,
         testthat (>= 1.0.0)
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-06-02 11:15:20 UTC; rich
+Packaged: 2017-09-08 07:32:10 UTC; rich
 Repository: CRAN
-Date/Publication: 2017-06-02 18:01:48 UTC
+Date/Publication: 2017-09-08 14:56:24 UTC

@@ -1,3 +1,14 @@
+## storr 1.1.2 (2017-09-??)
+
+* Use the full path so `storr`s still work when the the working directory changes (#50, #51, @wlandau)
+* Avoid DBI disconnection warnings when running tests
+* Avoid running Redis tests in inappropriate settings (#52, #53, thanks @wlandau)
+* Move Redis code entirely into redux
+
+## storr 1.1.1 (2017-06-02)
+
+* Fix bug padding of base64 encoded filenames (exposed only when using vectorised interface
+
 ## storr 1.1.0 (2017-05-05)
 
 * Support for using relational databases via DBI (SQLite, Postgres) #23 - MySQL and Microsoft SQL Server support is not implemented yet
