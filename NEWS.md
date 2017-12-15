@@ -1,4 +1,11 @@
-## storr 1.1.2 (2017-09-??)
+## storr 1.1.3 (2017-12-15)
+
+* Only use version 2 serialisation, avoiding breakage when version 3 is released in 3.5.0 (#62, reported by Tomas Kalibera)
+* Quote sql more safely (#60, reported by @wlandau)
+* Support for duplicating (`$duplicate`) and filling (`$fill`) keys with identical values, without duplicating or reserialising data (#56, requested by @wlandau)
+* Moved to a shiny new [pkgdown](http://pkgdown.r-lib.org) website - https://richfitz.github.com/storr
+
+## storr 1.1.2 (2017-09-08)
 
 * Use the full path so `storr`s still work when the the working directory changes (#50, #51, @wlandau)
 * Avoid DBI disconnection warnings when running tests
