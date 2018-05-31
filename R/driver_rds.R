@@ -21,6 +21,34 @@
 ##' is set.  Using \code{mangle_key = NULL} uses whatever mangledness
 ##' exists (or no mangledness if creating a new storr).
 ##'
+##' @section Corrupt keys:
+##'
+##' Some file synchronisation utilities like dropbox can create file
+##' that confuse an rds storr (e.g.,
+##' \code{"myobject (Someone's conflicted copy)"}.  If
+##' \code{mangle_key} is \code{FALSE} these cannot be detected but at
+##' the same time are not a real problem for storr.  However, if
+##' \code{mangle_key} is \code{TRUE} and keys are base64 encoded then
+##' these conflicted copies can break parts of storr.
+##'
+##' If you see a warning asking you to deal with these files, please
+##' delete the offending files; the path will be printed along with
+##' the files that are causing the problem.
+##'
+##' Alternatively, you can try (assuming a storr object \code{st})
+##' running
+##'
+##' \preformatted{
+##' st$driver$purge_corrupt_keys()
+##' }
+##'
+##' which will delete corrupted keys with no confirmation.  The
+##' messages that are printed to screen will be printed by default at
+##' most once per minute per namespace.  You can control this by
+##' setting the R option \code{storr.corrupt.notice.period} - setting
+##' this to \code{NA} suppresses the notice and otherwise it is
+##' interpreted as the number of seconds.
+##'
 ##' @title rds object cache driver
 ##' @param path Path for the store.  \code{tempdir()} is a good choice
 ##'   for ephemeral storage, The \code{rappdirs} package (on CRAN)
@@ -100,6 +128,7 @@ R6_driver_rds <- R6::R6Class(
     ## TODO: things like hash_algorithm: do they belong in traits?
     ## This needs sorting before anyone writes their own driver!
     path = NULL,
+    path_scratch = NULL,
     compress = NULL,
     mangle_key = NULL,
     mangle_key_pad = NULL,
@@ -114,6 +143,9 @@ R6_driver_rds <- R6::R6Class(
       dir_create(file.path(path, "keys"))
       dir_create(file.path(path, "config"))
       self$path <- normalizePath(path, mustWork = TRUE)
+
+      self$path_scratch <- file.path(self$path, "scratch")
+      dir_create(self$path_scratch)
 
       ## This is a bit of complicated dancing around to mantain
       ## backward compatibility while allowing better defaults in
@@ -159,6 +191,7 @@ R6_driver_rds <- R6::R6Class(
     type = function() {
       "rds"
     },
+
     destroy = function() {
       unlink(self$path, recursive = TRUE)
     },
@@ -166,23 +199,28 @@ R6_driver_rds <- R6::R6Class(
     get_hash = function(key, namespace) {
       readLines(self$name_key(key, namespace))
     },
+
     set_hash = function(key, namespace, hash) {
       dir_create(self$name_key("", namespace))
-      write_lines(hash, self$name_key(key, namespace))
+      write_lines(hash, self$name_key(key, namespace),
+                  scratch_dir = self$path_scratch)
     },
     get_object = function(hash) {
       readRDS(self$name_hash(hash))
     },
+
     set_object = function(hash, value) {
       ## NOTE: this takes advantage of having the serialized value
       ## already and avoids seralising twice.
       assert_raw(value)
-      write_serialized_rds(value, self$name_hash(hash), self$compress)
+      write_serialized_rds(value, self$name_hash(hash), self$compress,
+                           self$path_scratch)
     },
 
     exists_hash = function(key, namespace) {
       file.exists(self$name_key(key, namespace))
     },
+
     exists_object = function(hash) {
       file.exists(self$name_hash(hash))
     },
@@ -190,6 +228,7 @@ R6_driver_rds <- R6::R6Class(
     del_hash = function(key, namespace) {
       file_remove(self$name_key(key, namespace))
     },
+
     del_object = function(hash) {
       file_remove(self$name_hash(hash))
     },
@@ -197,12 +236,45 @@ R6_driver_rds <- R6::R6Class(
     list_hashes = function() {
       sub("\\.rds$", "", dir(file.path(self$path, "data")))
     },
+
     list_namespaces = function() {
       dir(file.path(self$path, "keys"))
     },
+
     list_keys = function(namespace) {
-      ret <- dir(file.path(self$path, "keys", namespace))
-      if (self$mangle_key) decode64(ret, TRUE) else ret
+      path <- file.path(self$path, "keys", namespace)
+      files <- dir(path)
+      if (self$mangle_key) {
+        ret <- decode64(files, error = FALSE)
+        if (anyNA(ret)) {
+          message_corrupted_rds_keys(namespace, path, files[is.na(ret)])
+          ret <- ret[!is.na(ret)]
+        }
+      } else {
+        ret <- files
+      }
+      ret
+    },
+
+    check_objects = function(full, hash_length, progress) {
+      check_rds_objects(self, full, hash_length, progress)
+    },
+
+    check_keys = function(full, hash_length, progress, invalid_hashes) {
+      check_rds_keys(self, full, hash_length, progress, invalid_hashes)
+    },
+
+    purge_corrupt_keys = function(namespace) {
+      if (self$mangle_key) {
+        path <- file.path(self$path, "keys", namespace)
+        files <- dir(path)
+        i <- is.na(decode64(files, error = FALSE))
+        if (any(i)) {
+          res <- file.remove(file.path(path, files[i]))
+          message(sprintf("Removed %d of %d corrupt %s",
+                          sum(res), sum(i), ngettext(sum(i), "file", "files")))
+        }
+      }
     },
 
     name_hash = function(hash) {
@@ -212,6 +284,7 @@ R6_driver_rds <- R6::R6Class(
         character(0)
       }
     },
+
     name_key = function(key, namespace) {
       if (self$mangle_key) {
         key <- encode64(key, pad = self$mangle_key_pad)
@@ -219,6 +292,7 @@ R6_driver_rds <- R6::R6Class(
       file.path(self$path, "keys", namespace, key)
     }
   ))
+
 
 ## This attempts to check that we are connecting to a storr of
 ## appropriate mangledness.  There's a lot of logic here, but it's
@@ -257,12 +331,119 @@ driver_rds_config <- function(path, name, value, default, must_agree) {
   value
 }
 
+
 driver_rds_config_file <- function(path, key) {
   file.path(path, "config", key)
 }
+
 
 write_if_missing <- function(value, path) {
   if (!file.exists(path)) {
     writeLines(value, path)
   }
+}
+
+check_rds_keys <- function(dr, full, hash_length, progress, invalid_hashes) {
+  ns <- dr$list_namespaces()
+  ret <- lapply(ns, check_rds_keys1, dr, full, hash_length, invalid_hashes)
+
+  collect <- function(k) {
+    dat <- lapply(ret, "[[", k)
+    cbind(namespace = rep(ns, lengths(dat)), key = unlist(dat, FALSE, FALSE))
+  }
+
+  list(corrupt = collect("corrupt"), dangling = collect("dangling"))
+}
+
+
+check_rds_keys1 <- function(ns, dr, full, hash_length, invalid_hashes) {
+  keys <- dr$list_keys(ns)
+  files <- dr$name_key(keys, ns)
+
+  if (full) {
+    hashes <- setdiff(dr$list_hashes(), invalid_hashes)
+    d <- lapply(files, readLines)
+
+    re <- sprintf("^[[:xdigit:]]{%d}$", hash_length)
+    corrupt <- !vlapply(d, function(x) length(x) == 1L && grepl(re, x))
+
+    dangling <- !corrupt
+    dangling[dangling] <- !vlapply(d[dangling], `%in%`, hashes)
+  } else {
+    len <- file_size(files)
+    ## Allow for these to have been written with no newline, unix
+    ## newline or windows crlf.
+    corrupt <- len < hash_length | len > hash_length + 2L
+    dangling <- logical()
+  }
+
+  list(corrupt = keys[corrupt],
+       dangling = keys[dangling])
+}
+
+
+check_rds_objects <- function(dr, full, hash_length, progress) {
+  h <- dr$list_hashes()
+  files <- dr$name_hash(h)
+
+  if (full) {
+    errs <- 0L
+    note_error <- function(e) {
+      errs <<- errs + 1L
+      TRUE
+    }
+    check <- function(x) {
+      tryCatch({
+        suppressWarnings(readRDS(x))
+        FALSE
+      }, error = note_error)
+    }
+    n <- length(files)
+    if (progress && n > 0 && requireNamespace("progress", quietly = TRUE)) {
+      tick <- progress::progress_bar$new(
+        format = "[:spin] [:bar] :percent (:errs corrupt)",
+        total = n)$tick
+    } else {
+      tick <- function(...) NULL
+    }
+    err <- logical(length(files))
+    for (i in seq_along(files)) {
+      err[i] <- check(files[[i]])
+      tick(tokens = list(errs = errs))
+    }
+  } else {
+    err <- file_size(files) == 0L
+  }
+
+  list(corrupt = h[err])
+}
+
+
+corrupt_notices <- new.env(parent = emptyenv())
+
+
+message_corrupted_rds_keys <- function(namespace, path, files) {
+  period <- getOption("storr.corrupt.notice.period", 60)
+  if (is.na(period)) {
+    return()
+  }
+  last <- corrupt_notices[[path]]
+  now <- Sys.time()
+  if (!is.null(last)) {
+    if (as.numeric(now - last, "secs") < period) {
+      return()
+    }
+  }
+
+  "%d corrupted files have been found in your storr archive:
+
+namespace: '%s'
+path: '%s'
+files:
+%s
+
+See 'Corrupt keys' within ?storr_rds for how to proceed" -> fmt
+  files <- sprintf("  - '%s'", files)
+  message(sprintf(fmt, length(files), namespace, path, files))
+  corrupt_notices[[path]] <- now
 }

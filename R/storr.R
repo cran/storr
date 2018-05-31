@@ -72,6 +72,7 @@ storr <- function(driver, default_namespace = "objects") {
   R6_storr$new(driver, default_namespace)
 }
 
+
 ##' @importFrom R6 R6Class
 R6_storr <- R6::R6Class(
   "storr",
@@ -143,6 +144,7 @@ R6_storr <- R6::R6Class(
       self$get_value(self$get_hash(key, namespace), use_cache)
 
     },
+
     mget = function(key, namespace = self$default_namespace, use_cache = TRUE,
                     missing = NULL) {
       self$mget_value(self$mget_hash(key, namespace), use_cache, missing)
@@ -179,6 +181,7 @@ R6_storr <- R6::R6Class(
       n <- check_length(key, namespace)
       invisible(self$driver$del_hash(key, namespace))
     },
+
     ## NOTE: No del_hash exposed here; this is because otherwise
     ## things can get pretty messy when actual data is being deleted.
 
@@ -367,18 +370,36 @@ R6_storr <- R6::R6Class(
       self$import(storr_rds(path, mangle_key = TRUE), names, namespace)
     },
 
+    index_export = function(namespace = NULL) {
+      storr_index_export(self, namespace)
+    },
+
+    index_import = function(index) {
+      storr_index_import(self, index)
+    },
+
+    check = function(full = TRUE, quiet = FALSE, progress = !quiet) {
+      storr_check(self, full, quiet, progress)
+    },
+
+    repair = function(storr_check_results = NULL, quiet = FALSE, ...,
+                      force = FALSE) {
+      storr_repair(self, storr_check_results, quiet, ..., force = force)
+    },
+
     ## Utility function that will come in useful in a few places:
     hash_object = function(object) {
       self$hash_raw(self$serialize_object(object))
     }
   ))
 
+
 storr_mset_hash <- function(obj, key, namespace, hash) {
   if (is.null(obj$driver$mset_hash)) {
     n <- length(hash)
+    key <- rep_len(key, n)
+    namespace <- rep_len(namespace, n)
     for (i in seq_len(n)) {
-      key <- rep_len(key, n)
-      namespace <- rep_len(namespace, n)
       obj$driver$set_hash(key[[i]], namespace[[i]], hash[[i]])
     }
   } else {
@@ -386,11 +407,108 @@ storr_mset_hash <- function(obj, key, namespace, hash) {
   }
 }
 
+
+storr_check <- function(obj, full, quiet, progress) {
+  obj$flush_cache()
+
+  driver <- obj$driver
+  if (is.null(driver$check_objects) || is.null(driver$check_keys)) {
+    stop(sprintf("This storr (with driver type '%s') does not support checking",
+                 obj$driver$type()))
+  }
+
+  hash_length <- nchar(obj$hash_object(NULL))
+  healthy <- TRUE
+
+  if (!quiet) {
+    message("Checking objects")
+  }
+  objects <- obj$driver$check_objects(full, hash_length, progress)
+  n <- length(objects$corrupt)
+  healthy <- n == 0L
+  if (!quiet) {
+    if (n > 0L) {
+      message(sprintf("...found %d corrupt objects", n))
+    } else {
+      message("...OK")
+    }
+  }
+
+  if (!quiet) {
+    message("Checking keys")
+  }
+
+  keys <- obj$driver$check_keys(full, hash_length, progress, objects$corrupt)
+  n <- viapply(keys, nrow)
+  healthy <- healthy && all(n == 0L)
+
+  if (!quiet) {
+    if (any(n > 0L)) {
+      for (i in seq_along(n)[n > 0]) {
+        message(sprintf("...found %d %s keys in %d namespaces",
+                        n[[i]], names(keys)[[i]],
+                        length(unique(keys[[i]][, "namespace"]))))
+      }
+    } else {
+      message("...OK")
+    }
+  }
+
+  ret <- list(healthy = healthy, objects = objects, keys = keys)
+  class(ret) <- "storr_check"
+  ret
+}
+
+
+storr_repair <- function(obj, storr_check_results, quiet, ..., force) {
+  if (is.null(storr_check_results)) {
+    storr_check_results <- obj$check(..., quiet = quiet)
+    if (storr_check_results$healthy) {
+      return(FALSE)
+    }
+
+    msg <- "Delete corrupted data? (no going back!)"
+    continue <- force || (interactive() && prompt_ask_yes_no(msg))
+    if (!continue) {
+      stop("Please rerun with force = TRUE, or provide check_results")
+    }
+  }
+  assert_is(storr_check_results, "storr_check")
+
+  ## Move the logic from above into here.
+  if (storr_check_results$healthy) {
+    return(FALSE)
+  }
+
+  h <- storr_check_results$objects$corrupt
+  k <- c(storr_check_results$keys$corrupt[, "key"],
+         storr_check_results$keys$dangling[, "key"])
+  ns <- c(storr_check_results$keys$corrupt[, "namespace"],
+          storr_check_results$keys$dangling[, "namespace"])
+
+  if (length(h) > 0L) {
+    if (!quiet) {
+      message(sprintf("Deleting %d corrupt objects", length(h)))
+    }
+    obj$driver$del_object(h)
+  }
+  if (length(k) > 0L) {
+    if (!quiet) {
+      message(sprintf("Deleting %d corrupt/dangling keys", length(k)))
+    }
+    obj$driver$del_hash(k, ns)
+  }
+
+  length(h) > 0 || length(k) > 0
+}
+
+
 ##' @export
 as.list.storr <- function(x, ...) {
   x <- x$export(list(), ...)
   x
 }
+
 
 ## This one is complicated enough to come out.
 storr_gc <- function(driver, envir) {
@@ -401,6 +519,7 @@ storr_gc <- function(driver, envir) {
   ## and let us know what was removed:
   invisible(unused)
 }
+
 
 storr_used_hashes <- function(driver) {
   list_hashes <- function(ns) {
@@ -415,6 +534,7 @@ storr_used_hashes <- function(driver) {
                 use.names = FALSE))
 }
 
+
 check_length <- function(key, namespace) {
   n_key <- length(key)
   n_namespace <- length(namespace)
@@ -426,6 +546,7 @@ check_length <- function(key, namespace) {
     stop("Incompatible lengths for key and namespace")
   }
 }
+
 
 ##' Utility function for driver authors
 ##'
@@ -444,4 +565,45 @@ join_key_namespace <- function(key, namespace) {
   list(n = n,
        key = rep_len(key, n),
        namespace = rep_len(namespace, n))
+}
+
+
+storr_index_export <- function(st, namespace = NULL) {
+  namespace <- namespace %||% st$list_namespaces()
+  keys <- lapply(namespace, st$list)
+  len <- lengths(keys)
+  if (any(len > 0L)) {
+    key <- unlist(keys, use.names = FALSE)
+  } else {
+    key <- character(0)
+  }
+
+  ret <- data.frame(namespace = rep(namespace, len),
+                    key = key,
+                    stringsAsFactors = FALSE)
+  ret$hash <- st$mget_hash(ret$key, ret$namespace)
+  ret
+}
+
+
+storr_index_import <- function(st, index) {
+  cols <- c("namespace", "key", "hash")
+  msg <- setdiff(cols, names(index))
+  if (length(msg) > 0L) {
+    stop("Missing required columns for index: ",
+         paste(squote(msg), collapse = ", "),
+         call. = FALSE)
+  }
+  ok <- vlapply(index[cols], is.character)
+  if (!all(ok)) {
+    stop("Column not character: ", paste(squote(cols[!ok]), collapse = ", "),
+         call. = FALSE)
+  }
+  msg <- setdiff(index$hash, st$list_hashes())
+  if (length(msg) > 0L) {
+    stop(sprintf("Missing %d / %d hashes - can't import",
+                 length(msg), nrow(index)),
+         call. = FALSE)
+  }
+  storr_mset_hash(st, index$key, index$namespace, index$hash)
 }

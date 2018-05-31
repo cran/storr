@@ -8,7 +8,7 @@
 ##' This function is likely most useful for things like caching
 ##' resources from websites, or computing long-running quantities on
 ##' demand.
-##' @title Storr that kooks for external resources
+##' @title Storr that looks for external resources
 ##' @param storage_driver Another \code{storr} driver to handle the
 ##'   actual storage.
 ##' @param fetch_hook A function to run to fetch data when a key is
@@ -22,6 +22,7 @@ storr_external <- function(storage_driver, fetch_hook,
                            default_namespace = "objects") {
   R6_storr_external$new(storage_driver, fetch_hook, default_namespace)
 }
+
 
 ## NOTE: This uses inheritence.  I actually think that this might be
 ## the right call here.  This could be implemented as a has-a
@@ -58,6 +59,7 @@ R6_storr_external <- R6::R6Class(
         super$get_hash(key, namespace)
       }
     }))
+
 
 check_external_fetch_hook <- function(fetch_hook) {
   ## NOTE: Could check here that there are two arguments, and that the

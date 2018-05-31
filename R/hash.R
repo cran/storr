@@ -8,7 +8,9 @@ make_hash_serialized_object <- function(hash_algorithm, skip_version) {
   }
 }
 
-make_serialize_object <- function(drop_r_version, string, xdr = TRUE) {
+
+make_serialize_object <- function(drop_r_version, string, xdr = TRUE,
+                                  r_version = get_r_version()) {
   if (string) {
     if (drop_r_version) {
       stop("Can't combine drop_r_version and string serialization")
@@ -17,7 +19,7 @@ make_serialize_object <- function(drop_r_version, string, xdr = TRUE) {
     ## because it is safer with respect to precision loss in doubles.
     ## It's the only thing I know of that depends on R between 3.1 and
     ## 3.2 and affects only the dbi driver at present.
-    if (r_version() < numeric_version("3.2.0")) {
+    if (r_version < numeric_version("3.2.0")) {
       stop("Please upgrade R to at least 3.2.0")
     }
     function(object) rawToChar(serialize_to_raw(object, NA, xdr))
@@ -27,6 +29,7 @@ make_serialize_object <- function(drop_r_version, string, xdr = TRUE) {
     function(object) serialize_to_raw(object, FALSE, xdr)
   }
 }
+
 
 unserialize_safe <- function(x) {
   if (is.character(x)) {
@@ -38,6 +41,7 @@ unserialize_safe <- function(x) {
   }
 }
 
+
 ## This is needed to support the case where the hash must apply to the
 ## *entire* structure, just just the relevant bytes.
 STORR_R_VERSION_BE <- as.raw(c(0L, 3L, 2L, 0L))
@@ -48,9 +52,11 @@ serialize_object_drop_r_version <- function(object, xdr = TRUE) {
   dat
 }
 
+
 serialize_to_raw <- function(x, ascii, xdr) {
   serialize(x, NULL, ascii = ascii, xdr = xdr, version = 2L)
 }
+
 
 ## For current R (3.3.2 or thereabouts) writeBin does not work with
 ## long vectors.  We can work around this for now, but in future
@@ -66,19 +72,29 @@ serialize_to_raw <- function(x, ascii, xdr) {
 ## been successful, otherwise the container will claim existence for
 ## an object which cannot be retrieved later on, causing havoc
 ## upstream.
-write_serialized_rds <- function(value, filename, compress, long = 2^31 - 2) {
+write_serialized_rds <- function(value, filename, compress,
+                                 scratch_dir = NULL, long = 2^31 - 2) {
   withCallingHandlers(
-    try_write_serialized_rds(value, filename, compress, long),
+    try_write_serialized_rds(value, filename, compress, scratch_dir, long),
     error = function(e) unlink(filename))
 }
+
 
 ## The split here helps keep the order really consistent; we will
 ## close the connection on exit from try_write_serialized_rds and
 ## delete the file *after* that.
 try_write_serialized_rds <- function(value, filename, compress,
-                                     long = 2^31 - 2) {
-  con <- (if (compress) gzfile else file)(filename, "wb")
-  on.exit(close(con))
+                                     scratch_dir = NULL, long = 2^31 - 2) {
+  if (is.null(scratch_dir)) {
+    scratch_dir <- tempfile()
+    dir.create(scratch_dir)
+    on.exit(unlink(scratch_dir, recursive = TRUE))
+  }
+  tmp <- file.path(scratch_dir, basename(filename))
+
+  con <- (if (compress) gzfile else file)(tmp, "wb")
+  needs_close <- TRUE
+  on.exit(if (needs_close) close(con), add = TRUE)
   len <- length(value)
   if (len < long) {
     writeBin(value, con)
@@ -86,20 +102,34 @@ try_write_serialized_rds <- function(value, filename, compress,
     message("Repacking large object")
     saveRDS(unserialize(value), con)
   }
+  close(con)
+  needs_close <- FALSE
+  file.rename(tmp, filename)
 }
+
 
 ## Same pattern for write_lines.  The difference is that this will
 ## delete the key on a failed write (otherwise there's a copy
 ## involved)
-write_lines <- function(text, filename, ...) {
+write_lines <- function(text, filename, ..., scratch_dir = NULL) {
+  if (is.null(scratch_dir)) {
+    scratch_dir <- tempfile()
+    dir.create(scratch_dir)
+    on.exit(unlink(scratch_dir, recursive = TRUE))
+  }
   withCallingHandlers(
-    try_write_lines(text, filename, ...),
+    try_write_lines(text, filename, ..., scratch_dir = scratch_dir),
     error = function(e) unlink(filename))
 }
 
-try_write_lines <- function(text, filename, ...) {
-  if (file.exists(filename)) {
-    file.remove(filename)
-  }
-  writeLines(text, filename, ...)
+
+## This implements write-then-move for writeLines, which gives us
+## atomic writes and rewrites.  If 'scratch' is on the same filesystem
+## as dirname(filename), then the os's rename is atomic
+try_write_lines <- function(text, filename, ..., scratch_dir) {
+  tmp <- file.path(scratch_dir, basename(filename))
+  writeLines(text, tmp, ...)
+  ## Not 100% necessary and strictly makes this nonatomic
+  unlink(filename)
+  file.rename(tmp, filename)
 }

@@ -1,35 +1,10 @@
 context("base64")
 
-test_that("base64", {
-  rand_str_len <- function(n) {
-    pos <- as.raw(32:126)
-    rawToChar(sample(pos, n, replace = TRUE))
-  }
-  if ("base64enc" %in% .packages(TRUE)) {
-    cmp <- function(x) {
-      ret <- base64enc::base64encode(charToRaw(x))
-      gsub("+", "-", gsub("/", "_", ret, fixed = TRUE), fixed = TRUE)
-    }
-  } else {
-    cmp <- encode64
-  }
+test_that("base64 reference", {
+  ref <- read.csv("base64_reference.csv", stringsAsFactors = FALSE)
 
-  err1 <- err2 <- character(0)
-
-  for (len in 1:20) {
-    for (r in 1:20) {
-      s <- rand_str_len(len)
-      t <- encode64(s)
-      if (!identical(encode64(s), cmp(s))) {
-        err1 <- c(err1, s)
-      }
-      if (!identical(decode64(t), s)) {
-        err2 <- c(err2, s)
-      }
-    }
-  }
-  expect_identical(length(err1), 0L)
-  expect_identical(length(err2), 0L)
+  expect_equal(encode64(ref$input), ref$output)
+  expect_equal(decode64(ref$output), ref$input)
 })
 
 test_that("vector", {
@@ -80,4 +55,14 @@ test_that("vector encode", {
   cmp <- vcapply(v, encode64, pad = TRUE, USE.NAMES = FALSE)
   expect_equal(encode64(v, pad = TRUE), cmp)
   expect_equal(encode64(v, pad = FALSE), sub("=+$", "", cmp))
+})
+
+
+test_that("invalid strings", {
+  str <- "TWFyY2g= (conflicted copy)"
+  expect_error(decode64(str), "is not base64")
+  expect_identical(decode64(str, error = FALSE), NA_character_)
+
+  v <- c(encode64("a"), "TWFyY2g= (conflicted copy)")
+  expect_identical(decode64(v, error = FALSE), c("a", NA_character_))
 })

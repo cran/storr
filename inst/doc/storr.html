@@ -12,7 +12,7 @@
 
 <meta name="author" content="Rich FitzJohn" />
 
-<meta name="date" content="2017-12-15" />
+<meta name="date" content="2018-05-31" />
 
 <title>storr</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">storr</h1>
 <h4 class="author"><em>Rich FitzJohn</em></h4>
-<h4 class="date"><em>2017-12-15</em></h4>
+<h4 class="date"><em>2018-05-31</em></h4>
 
 
 
@@ -128,7 +128,7 @@ h</code></pre></div>
 <p>similarly, we can test to see if an object is present in the database using its hash:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">exists_object</span>(h)</code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<p>though now that there are no keys pointing at the data is is subject to garbage collection:</p>
+<p>though now that there are no keys pointing at the data it is subject to garbage collection:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">del &lt;-<span class="st"> </span>st$<span class="kw">gc</span>()
 del</code></pre></div>
 <pre><code>## [1] &quot;a63c70e73b58d0823ab3bcbd3b543d6f&quot;</code></pre>
@@ -137,7 +137,7 @@ del</code></pre></div>
 </div>
 <div id="namespaces" class="section level2">
 <h2>Namespaces</h2>
-<p>At some point having everything stored in a great big bucket may become too instrucured. To help with this storr implements a very simple “namespace” system that may help provide some structure. It is a single layer of hierarchy above keys; so every key belongs to a namespace. The default namespace is “objects” but this can be configured when the storr is created.</p>
+<p>At some point having everything stored in a great big bucket may become too unstructured. To help with this storr implements a very simple “namespace” system that may help provide some structure. It is a single layer of hierarchy above keys; so every key belongs to a namespace. The default namespace is “objects” but this can be configured when the storr is created.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$default_namespace</code></pre></div>
 <pre><code>## [1] &quot;objects&quot;</code></pre>
 <p>The <code>list_namespaces()</code> method lists all known namespaces</p>
@@ -156,11 +156,11 @@ st$<span class="kw">list_namespaces</span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">get</span>(<span class="st">&quot;a&quot;</span>)</code></pre></div>
 <pre><code>## Error: key 'a' ('objects') not found</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">get</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;other_things&quot;</span>)</code></pre></div>
-<pre><code>## [1] 0.2692462 0.2256268 0.6966830 0.9583508 0.7758955</code></pre>
+<pre><code>## [1] 0.04958454 0.32086574 0.47358389 0.04724510 0.24503947</code></pre>
 </div>
 <div id="bulk-getset" class="section level2">
 <h2>Bulk get/set</h2>
-<p>If you have many values to get or set, for some databases it will be much more efficient to get and set them in bulk; this is particularly the case with high-latency database (e.g., anything over a network connection, especially an internet connection). To help with this, storr implements <code>mget</code> and <code>mset</code> methods that allow multiple values to retrieved or set.</p>
+<p>If you have many values to get or set, for some databases it will be much more efficient to get and set them in bulk; this is particularly the case with high-latency databases (e.g., anything over a network connection, especially an internet connection). To help with this, storr implements <code>mget</code> and <code>mset</code> methods that allow multiple values to retrieved or set.</p>
 <p>The <code>mset</code> function allows multiple keys (and/or multiple namespaces) and multiple data elements. The data must have the same <code>length()</code> as the number of keys being set.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">mset</span>(<span class="kw">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>), <span class="kw">list</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))
 st$<span class="kw">get</span>(<span class="st">&quot;a&quot;</span>)</code></pre></div>
@@ -201,7 +201,7 @@ st$<span class="kw">mget</span>(<span class="st">&quot;x&quot;</span>, <span cla
 </div>
 <div id="import-export" class="section level2">
 <h2>Import / export</h2>
-<p>Objects can be imported in and exported out of a <code>storr</code>;</p>
+<p>Objects can be imported in and exported out of a <code>storr</code>:</p>
 <p>Import from a list, environment or another <code>storr</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">import</span>(<span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">2</span>))
 st$<span class="kw">list</span>()</code></pre></div>
@@ -251,21 +251,21 @@ st2$<span class="kw">list</span>()</code></pre></div>
 <pre><code>## [1] &quot;6717f2823d3202449301145073ab8719&quot;</code></pre>
 <p>Then there is one big pool of hash / value pairs:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">list_hashes</span>()</code></pre></div>
-<pre><code>## [1] &quot;127a2ec00989b9f7faf671ed470be7f8&quot; &quot;30b80502ba48cb853276c2256923ac55&quot;
-## [3] &quot;6717f2823d3202449301145073ab8719&quot; &quot;db8e490a925a60e62212cefc7674ca02&quot;
+<pre><code>## [1] &quot;127a2ec00989b9f7faf671ed470be7f8&quot; &quot;6717f2823d3202449301145073ab8719&quot;
+## [3] &quot;afe0e868024cb60d435ae37620ef188c&quot; &quot;db8e490a925a60e62212cefc7674ca02&quot;
 ## [5] &quot;ddf100612805359cd81fdc5ce3b9fbba&quot; &quot;e5b57f323c7b3719bbaaf9f96b260d39&quot;</code></pre>
 <p>in the rds driver these are stored like so:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir</span>(<span class="kw">file.path</span>(path, <span class="st">&quot;data&quot;</span>))</code></pre></div>
 <pre><code>## [1] &quot;127a2ec00989b9f7faf671ed470be7f8.rds&quot;
-## [2] &quot;30b80502ba48cb853276c2256923ac55.rds&quot;
-## [3] &quot;6717f2823d3202449301145073ab8719.rds&quot;
+## [2] &quot;6717f2823d3202449301145073ab8719.rds&quot;
+## [3] &quot;afe0e868024cb60d435ae37620ef188c.rds&quot;
 ## [4] &quot;db8e490a925a60e62212cefc7674ca02.rds&quot;
 ## [5] &quot;ddf100612805359cd81fdc5ce3b9fbba.rds&quot;
 ## [6] &quot;e5b57f323c7b3719bbaaf9f96b260d39.rds&quot;</code></pre>
 </div>
 <div id="environment-based-caching" class="section level3">
 <h3>Environment-based caching</h3>
-<p>Every time data passes across a <code>get</code> or <code>set</code> method, <code>storr</code> stores the data in an environment within the <code>storr</code> object. Because we store the content against its hash, it’s always in sync with what is saved to disk. That means that the look up process goes like this:</p>
+<p>Every time data passes across a <code>get</code> or <code>set</code> method, <code>storr</code> stores the data in an environment within the <code>storr</code> object. Because we store the content against its hash, it’s always in sync with what is saved to disk. That means that the look-up process goes like this:</p>
 <ol style="list-style-type: decimal">
 <li>Ask for a key, get returned the hash of the content</li>
 <li>Check in the caching environment for that hash and return that if present</li>
@@ -313,7 +313,7 @@ st$<span class="kw">set</span>(<span class="st">&quot;mykey&quot;</span>, <span 
 ##     }
 ##     value
 ## }
-## &lt;environment: 0x5599f00&gt;</code></pre>
+## &lt;environment: 0x7fc1d6b76ef8&gt;</code></pre>
 <p>The speed up is going to be fairly context dependent, but 5-10x seems pretty good in this case (some of the overhead is simply a longer code path as we call out to the driver). For big bits of data and slow network connections the difference will be much more pronounced.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hash &lt;-<span class="st"> </span>st$<span class="kw">get_hash</span>(<span class="st">&quot;mykey&quot;</span>)
 if (<span class="kw">requireNamespace</span>(<span class="st">&quot;rbenchmark&quot;</span>)) {
@@ -324,7 +324,7 @@ if (<span class="kw">requireNamespace</span>(<span class="st">&quot;rbenchmark&q
 <pre><code>## Loading required namespace: rbenchmark</code></pre>
 <pre><code>##                                    test replications elapsed relative
 ## 1  st$get_value(hash, use_cache = TRUE)         1000   0.011    1.000
-## 2 st$get_value(hash, use_cache = FALSE)         1000   0.056    5.091</code></pre>
+## 2 st$get_value(hash, use_cache = FALSE)         1000   0.095    8.636</code></pre>
 </div>
 <div id="classed-exceptions" class="section level3">
 <h3>Classed exceptions</h3>

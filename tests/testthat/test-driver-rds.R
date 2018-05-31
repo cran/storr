@@ -8,7 +8,7 @@ test_that("creation", {
   on.exit(dr$destroy())
 
   expect_true(file.exists(path))
-  expect_identical(sort(dir(path)), c("config", "data", "keys"))
+  expect_identical(sort(dir(path)), c("config", "data", "keys", "scratch"))
   expect_identical(dir(file.path(path, "data")), character(0))
   expect_false(dr$mangle_key)
 })
@@ -198,6 +198,7 @@ test_that("mangledness padding backward compatibility", {
 ## This is a test for issue 42; check that hard links do not create
 ## inconsistent storrs.
 test_that("copy -lr and consistency", {
+  skip_on_cran()
   skip_on_os(c("windows", "mac", "solaris"))
 
   path1 <- tempfile()
@@ -241,4 +242,101 @@ test_that("change directories and access same storr", {
   setwd("..")
   unlink(subdir, recursive = TRUE)
   x$destroy()
+})
+
+test_that("check empty storr", {
+  st <- storr_rds(tempfile())
+  expect_true(st$check()$healthy)
+  expect_silent(st$check(quiet = TRUE))
+})
+
+test_that("recover corrupt storr: corrupted rds", {
+  st <- storr_rds(tempfile())
+
+  ## First start with a storr with some data in it:
+  for (i in 1:10) {
+    st$mset(paste0(letters[[i]], seq_len(i)),
+            lapply(seq_len(i), function(.) runif(20)),
+            namespace = LETTERS[[i]])
+  }
+
+  res <- st$check()
+  expect_true(res$healthy)
+
+  ## Then let's truncate some data!
+  set.seed(1)
+  i <- sample.int(55, 5)
+  r <- st$list_hashes()[i]
+  for (p in st$driver$name_hash(r)) {
+    writeBin(raw(), p)
+  }
+
+  res <- st$check()
+  expect_is(res, "storr_check")
+  expect_false(res$healthy)
+
+  expect_equal(length(res$objects$corrupt), 5L)
+  expect_equal(nrow(res$keys$corrupt), 0L)
+  expect_equal(nrow(res$keys$dangling), 5L)
+
+  res2 <- st$check(full = FALSE)
+  expect_false(res2$healthy)
+  expect_equal(res2$objects, res$objects)
+  expect_equal(nrow(res2$keys$corrupt), 0L)
+  expect_equal(nrow(res2$keys$dangling), 0L)
+
+  st$repair(force = TRUE)
+  res <- st$check()
+  expect_true(res$healthy)
+  expect_false(st$repair(res, force = TRUE))
+  expect_silent(st$repair(res, force = TRUE))
+  expect_equal(st$check(full = FALSE), res)
+})
+
+
+test_that("don't run automatically", {
+  skip_if_interactive()
+  st <- storr_rds(tempfile())
+  for (i in 1:10) {
+    st$mset(paste0(letters[[i]], seq_len(i)),
+            lapply(seq_len(i), function(.) runif(20)),
+            namespace = LETTERS[[i]])
+  }
+  set.seed(1)
+  i <- sample.int(55, 5)
+  r <- st$list_hashes()[i]
+  for (p in st$driver$name_hash(r)) {
+    writeBin(raw(), p)
+  }
+
+  expect_error(st$repair(force = FALSE),
+               "Please rerun with force")
+})
+
+
+test_that("automatic is ok if storr is healthy", {
+  expect_false(storr_rds(tempfile())$repair(force = FALSE))
+})
+
+
+test_that("corrupted mangled keys", {
+  st <- storr_rds(tempfile(), mangle_key = TRUE, mangle_key_pad = TRUE)
+  st$mset(month.name,
+          lapply(seq_along(month.name), function(.) runif(20)))
+  keys <- st$driver$name_key(month.name, "objects")
+  file.copy(keys[[3]],
+            paste(keys[[3]], "(conflicted copy)"))
+  with_options(list("storr.corrupt.notice.period" = NA),
+               expect_silent(st$list()))
+  expect_message(st$list(),
+                 "1 corrupted files have been found in your storr archive:")
+  expect_silent(st$list())
+  with_options(list("storr.corrupt.notice.period" = 0L),
+               expect_message(st$list(), "namespace: 'objects'"))
+
+  expect_message(st$driver$purge_corrupt_keys("objects"),
+                 "Removed 1 of 1 corrupt file")
+  with_options(list("storr.corrupt.notice.period" = 0L),
+               expect_silent(st$list()))
+  expect_silent(st$driver$purge_corrupt_keys("objects"))
 })

@@ -1,3 +1,10 @@
+## storr 1.2.0 (2018-05-31)
+
+* New index function (#22, requested by @wlandau)
+* Support for creating storrs with different storage for keys and data (`driver_multistorr` and `storr_multistorr`, #67)
+* New repair methods (`$check` and `$repair`) for detecting some problems with storr repositories.  This is a work in progress and is currently only supported for the rds driver.
+* Support infrastructure for "remote storr" databases, which can be used to create a storr of rds objects on a remote location (#61).  This does not implement any useful remote storrs, but only provides support for doing so.
+
 ## storr 1.1.3 (2017-12-15)
 
 * Only use version 2 serialisation, avoiding breakage when version 3 is released in 3.5.0 (#62, reported by Tomas Kalibera)
