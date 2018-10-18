@@ -12,7 +12,7 @@
 
 <meta name="author" content="Rich FitzJohn" />
 
-<meta name="date" content="2018-05-31" />
+<meta name="date" content="2018-10-18" />
 
 <title>external</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">external</h1>
 <h4 class="author"><em>Rich FitzJohn</em></h4>
-<h4 class="date"><em>2018-05-31</em></h4>
+<h4 class="date"><em>2018-10-18</em></h4>
 
 
 
@@ -125,7 +125,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## open URL 'https://raw.githubusercontent.com/richfitz/no_such_repo/master/
 ## DESCRIPTION': HTTP status was '404 Not Found'</code></pre>
 <pre><code>## Warning in file.remove(path): cannot remove file '/var/folders/3z/
-## 86tv450j7kb4w5y4wpxj6d5r0000gn/T//RtmpiozHHH/gh_description_1589e2e82fdc1',
+## 86tv450j7kb4w5y4wpxj6d5r0000gn/T//RtmppwojCb/gh_description_47e77328d853',
 ## reason 'No such file or directory'</code></pre>
 <pre><code>## ** Repository richfitz/no_such_repo not found</code></pre>
 <p>This would happen for all errors, including lack of internet connectivity, corrupt file downloads, etc. The original error will be returned as the <code>$e</code> element of the error if you need to distinguish between types of failure. The <code>KeyErrorExternal</code> is also a <code>KeyError</code> class, so code that catches <code>KeyErrors</code> will still work as expected.</p>
@@ -135,7 +135,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 st_rds$<span class="kw">list</span>()</code></pre></div>
 <pre><code>## [1] &quot;richfitz/storr&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st_rds$<span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>)$Version</code></pre></div>
-<pre><code>## [1] &quot;1.2.0&quot;</code></pre>
+<pre><code>## [1] &quot;1.2.1&quot;</code></pre>
 <p>The <code>st_rds</code> storr does not include the fetch hook; it is a plain storr.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st_rds$<span class="kw">destroy</span>()</code></pre></div>
 <div id="memoisation" class="section level1">
@@ -159,7 +159,7 @@ st_rds$<span class="kw">list</span>()</code></pre></div>
 st &lt;-<span class="st"> </span>storr::<span class="kw">storr_external</span>(storr::<span class="kw">driver_environment</span>(), hook)</code></pre></div>
 <p>The first time the result is retrieved the message will be printed (the function is evaluated)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>st$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>)</code></pre></div>
-<pre><code>## Computing f(0.562, 0.930)</code></pre>
+<pre><code>## Computing f(0.504, 0.732)</code></pre>
 <p>The second time, it will not be as the result is retrieved from the storr:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(st$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>), x)</code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
@@ -178,7 +178,7 @@ hook2 &lt;-<span class="st"> </span>function(key, namespace) {
 st_use &lt;-<span class="st"> </span>storr::<span class="kw">storr_external</span>(st$driver, hook2)
 
 x1 &lt;-<span class="st"> </span>st_use$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</code></pre></div>
-<pre><code>## Computing f(0.562, 0.930)</code></pre>
+<pre><code>## Computing f(0.504, 0.732)</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x2 &lt;-<span class="st"> </span>st_use$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</code></pre></div>
 <p>Memoisation in the style of the <code>memoise</code> package is possible to implement, but is not provided in the package. Implementation is straightforward and will work with any driver:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">memoise &lt;-<span class="st"> </span>function(f, <span class="dt">driver =</span> storr::<span class="kw">driver_environment</span>()) {

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Rich FitzJohn" />
 
-<meta name="date" content="2018-05-31" />
+<meta name="date" content="2018-10-18" />
 
 <title>storr</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">storr</h1>
 <h4 class="author"><em>Rich FitzJohn</em></h4>
-<h4 class="date"><em>2018-05-31</em></h4>
+<h4 class="date"><em>2018-10-18</em></h4>
 
 
 
@@ -156,7 +156,7 @@ st$<span class="kw">list_namespaces</span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">get</span>(<span class="st">&quot;a&quot;</span>)</code></pre></div>
 <pre><code>## Error: key 'a' ('objects') not found</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">get</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;other_things&quot;</span>)</code></pre></div>
-<pre><code>## [1] 0.04958454 0.32086574 0.47358389 0.04724510 0.24503947</code></pre>
+<pre><code>## [1] 0.6471639 0.8297184 0.7074470 0.9536839 0.1410594</code></pre>
 </div>
 <div id="bulk-getset" class="section level2">
 <h2>Bulk get/set</h2>
@@ -252,13 +252,13 @@ st2$<span class="kw">list</span>()</code></pre></div>
 <p>Then there is one big pool of hash / value pairs:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">list_hashes</span>()</code></pre></div>
 <pre><code>## [1] &quot;127a2ec00989b9f7faf671ed470be7f8&quot; &quot;6717f2823d3202449301145073ab8719&quot;
-## [3] &quot;afe0e868024cb60d435ae37620ef188c&quot; &quot;db8e490a925a60e62212cefc7674ca02&quot;
+## [3] &quot;6f4fef8908c2ed16a8d7c0806ff465a5&quot; &quot;db8e490a925a60e62212cefc7674ca02&quot;
 ## [5] &quot;ddf100612805359cd81fdc5ce3b9fbba&quot; &quot;e5b57f323c7b3719bbaaf9f96b260d39&quot;</code></pre>
 <p>in the rds driver these are stored like so:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dir</span>(<span class="kw">file.path</span>(path, <span class="st">&quot;data&quot;</span>))</code></pre></div>
 <pre><code>## [1] &quot;127a2ec00989b9f7faf671ed470be7f8.rds&quot;
 ## [2] &quot;6717f2823d3202449301145073ab8719.rds&quot;
-## [3] &quot;afe0e868024cb60d435ae37620ef188c.rds&quot;
+## [3] &quot;6f4fef8908c2ed16a8d7c0806ff465a5.rds&quot;
 ## [4] &quot;db8e490a925a60e62212cefc7674ca02.rds&quot;
 ## [5] &quot;ddf100612805359cd81fdc5ce3b9fbba.rds&quot;
 ## [6] &quot;e5b57f323c7b3719bbaaf9f96b260d39.rds&quot;</code></pre>
@@ -313,7 +313,7 @@ st$<span class="kw">set</span>(<span class="st">&quot;mykey&quot;</span>, <span 
 ##     }
 ##     value
 ## }
-## &lt;environment: 0x7fc1d6b76ef8&gt;</code></pre>
+## &lt;environment: 0x7f83ec5d5390&gt;</code></pre>
 <p>The speed up is going to be fairly context dependent, but 5-10x seems pretty good in this case (some of the overhead is simply a longer code path as we call out to the driver). For big bits of data and slow network connections the difference will be much more pronounced.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hash &lt;-<span class="st"> </span>st$<span class="kw">get_hash</span>(<span class="st">&quot;mykey&quot;</span>)
 if (<span class="kw">requireNamespace</span>(<span class="st">&quot;rbenchmark&quot;</span>)) {
@@ -324,7 +324,7 @@ if (<span class="kw">requireNamespace</span>(<span class="st">&quot;rbenchmark&q
 <pre><code>## Loading required namespace: rbenchmark</code></pre>
 <pre><code>##                                    test replications elapsed relative
 ## 1  st$get_value(hash, use_cache = TRUE)         1000   0.011    1.000
-## 2 st$get_value(hash, use_cache = FALSE)         1000   0.095    8.636</code></pre>
+## 2 st$get_value(hash, use_cache = FALSE)         1000   0.089    8.091</code></pre>
 </div>
 <div id="classed-exceptions" class="section level3">
 <h3>Classed exceptions</h3>
