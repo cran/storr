@@ -35,7 +35,8 @@ testthat::test_that("basic", {
 
   testthat::expect_error(st$get(key),
                          sprintf("key '%s' ('objects') not found", key),
-                         fixed = TRUE)
+                         fixed = TRUE,
+                         class = "KeyError")
 
   d <- runif(100)
   hash <- st$hash_object(d)
@@ -210,16 +211,25 @@ testthat::test_that("hash_algorithm", {
 
     st <- storr(dr)
     st$set(key, x)
-    testthat::expect_equal(st$get(key), x)
 
+    testthat::expect_equal(st$get(key), x)
     hash <- st$hash_object(x)
     testthat::expect_equal(st$list_hashes(), hash)
     ## Sanity check
     testthat::expect_equal(hash == hmd5, h == "md5")
 
     h_other <- setdiff(hash_algos, h)[[1L]]
-    testthat::expect_error(.driver_create(dr, hash_algorithm = h_other),
-                           "Incompatible value for hash_algorithm")
+
+    ## TODO: doing this with
+    ##
+    ##   testthat::expect_error(.driver_create(dr, hash_algorithm = h_other),
+    ##                           "Incompatible value for hash_algorithm")
+    ##
+    ## would be preferable, but testthat gives a warning about this up
+    ## to version 3.0.0 and thor does not include an appropriate error
+    ## class.
+    e <- expect_error(.driver_create(dr, hash_algorithm = h_other))
+    expect_match(e$message, "Incompatible value for hash_algorithm")
 
     testthat::expect_equal(.driver_create(dr)$hash_algorithm, h)
 
@@ -241,7 +251,8 @@ testthat::test_that("get_value", {
   testthat::expect_equal(st$get_value(h), x)
 
   testthat::expect_error(st$get_value("nosuchhash"),
-                         "hash 'nosuchhash' not found")
+                         "hash 'nosuchhash' not found",
+                         class = "HashError")
 })
 
 

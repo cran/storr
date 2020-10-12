@@ -76,8 +76,19 @@ test_driver <- function(create) {
   dr$destroy()
 
   env$.driver_create <- create
-  res <- lapply(files, testthat::test_file, env = env,
-                reporter = reporter, start_end_reporter = FALSE)
+
+  ## This exists only until testthat version 3.0.x is released, when
+  ## we'll just depend on the most recent copy.
+  ## nocov start
+  if (utils::packageVersion("testthat") < "2.99") {
+    res <- lapply(files, testthat::test_file, env = env,
+                  reporter = reporter, start_end_reporter = FALSE)
+
+  } else {
+    res <- lapply(files, testthat::test_file, env = env,
+                  reporter = reporter)
+  }
+  ## nocov end
 
   df <- do.call("rbind", lapply(res, as.data.frame))
 

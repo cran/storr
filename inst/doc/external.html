@@ -1,65 +1,296 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Rich FitzJohn" />
 
-<meta name="date" content="2018-10-18" />
+<meta name="date" content="2020-10-12" />
 
 <title>external</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -69,8 +300,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">external</h1>
-<h4 class="author"><em>Rich FitzJohn</em></h4>
-<h4 class="date"><em>2018-10-18</em></h4>
+<h4 class="author">Rich FitzJohn</h4>
+<h4 class="date">2020-10-12</h4>
 
 
 
@@ -82,138 +313,141 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ol>
 <p>This is in some ways a variant on the memoisation pattern; if the key refers to a set of arguments to a long running function we get something like memoisation (see the bottom of this file).</p>
 <p>As an example, this vignette will download some DESCRIPTION files from github, using the name of the repository as the key.</p>
-<p>The first step is writing a hook function; this is a function with arguments <code>(key, namespace)</code> that returns an R object. For packages stored in the root directory of a repository we can build URLs of the form:</p>
-<p><a href="https://raw.githubusercontent.com/" class="uri">https://raw.githubusercontent.com/</a><username>/&gt;repo&gt;/master/DESCRIPTION</p>
+<p>The first step is writing a hook function; this is a function with arguments <code>(key, namespace)</code> that returns an R object. For packages stored in the root directory of a repository we can build URLs of the form</p>
+<pre><code>https://raw.githubusercontent.com/&lt;username&gt;/&lt;repo&gt;/master/DESCRIPTION</code></pre>
 <p>So if the key is a username/repo pair and we ignore namespace we can write a function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fetch_hook_gh_description &lt;-<span class="st"> </span>function(key, namespace) {
-  if (!<span class="kw">isTRUE</span>(<span class="kw">unname</span>(<span class="kw">capabilities</span>(<span class="st">&quot;libcurl&quot;</span>)))) {
-    <span class="kw">stop</span>(<span class="st">&quot;This vignette requires libcurl support in R to run&quot;</span>)
-  }
-  fmt &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/%s/master/DESCRIPTION&quot;</span>
-  path &lt;-<span class="st"> </span><span class="kw">tempfile</span>(<span class="st">&quot;gh_description_&quot;</span>)
-  <span class="kw">on.exit</span>(<span class="kw">file.remove</span>(path))
-  code &lt;-<span class="st"> </span><span class="kw">download.file</span>(<span class="kw">sprintf</span>(fmt, key), path, <span class="dt">mode =</span> <span class="st">&quot;wb&quot;</span>)
-  if (code !=<span class="st"> </span>0L) {
-    <span class="kw">stop</span>(<span class="st">&quot;Error downloading file&quot;</span>)
-  }
-  <span class="kw">as.list</span>(<span class="kw">read.dcf</span>(path)[<span class="dv">1</span>, ])
-}</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">fetch_hook_gh_description &lt;-<span class="st"> </span><span class="cf">function</span>(key, namespace) {</a>
+<a class="sourceLine" id="cb2-2" title="2">  <span class="cf">if</span> (<span class="op">!</span><span class="kw">isTRUE</span>(<span class="kw">unname</span>(<span class="kw">capabilities</span>(<span class="st">&quot;libcurl&quot;</span>)))) {</a>
+<a class="sourceLine" id="cb2-3" title="3">    <span class="kw">stop</span>(<span class="st">&quot;This vignette requires libcurl support in R to run&quot;</span>)</a>
+<a class="sourceLine" id="cb2-4" title="4">  }</a>
+<a class="sourceLine" id="cb2-5" title="5">  fmt &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/%s/master/DESCRIPTION&quot;</span></a>
+<a class="sourceLine" id="cb2-6" title="6">  path &lt;-<span class="st"> </span><span class="kw">tempfile</span>(<span class="st">&quot;gh_description_&quot;</span>)</a>
+<a class="sourceLine" id="cb2-7" title="7">  <span class="kw">on.exit</span>(<span class="kw">file.remove</span>(path))</a>
+<a class="sourceLine" id="cb2-8" title="8">  code &lt;-<span class="st"> </span><span class="kw">download.file</span>(<span class="kw">sprintf</span>(fmt, key), path, <span class="dt">mode =</span> <span class="st">&quot;wb&quot;</span>)</a>
+<a class="sourceLine" id="cb2-9" title="9">  <span class="cf">if</span> (code <span class="op">!=</span><span class="st"> </span>0L) {</a>
+<a class="sourceLine" id="cb2-10" title="10">    <span class="kw">stop</span>(<span class="st">&quot;Error downloading file&quot;</span>)</a>
+<a class="sourceLine" id="cb2-11" title="11">  }</a>
+<a class="sourceLine" id="cb2-12" title="12">  <span class="kw">as.list</span>(<span class="kw">read.dcf</span>(path)[<span class="dv">1</span>, ])</a>
+<a class="sourceLine" id="cb2-13" title="13">}</a></code></pre></div>
 <p>This function downloads the requested DESCRIPTION file into a temporary file (which it promises to delete later using <code>on.exit</code>), checks that the download was successful, then reads in the downloaded file and converts it into a list.</p>
 <p>The <code>httr</code> and <code>curl</code> packages make this a little easier to do with authorisation so that this would work for private repositories by using a token.</p>
 <p>With this in place, we can build a storr:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st &lt;-<span class="st"> </span>storr::<span class="kw">storr_external</span>(storr::<span class="kw">driver_environment</span>(),
-                            fetch_hook_gh_description)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">st &lt;-<span class="st"> </span>storr<span class="op">::</span><span class="kw">storr_external</span>(storr<span class="op">::</span><span class="kw">driver_environment</span>(),</a>
+<a class="sourceLine" id="cb3-2" title="2">                            fetch_hook_gh_description)</a></code></pre></div>
 <p>The first argument here is a storr <em>driver</em> (i.e., a <code>driver_</code> function). If you have a storr that you want to use, pass it as <code>st$driver</code> to extract the underlying driver (and share storage with your existing storr).</p>
 <p>As with other storr creation functions, you can set the default namespace using the <code>default_namespace</code> argument.</p>
 <p>The returned object is exactly the same as a usual storr except that the <code>get</code> method has changed (this is done by inheritence). The <code>get</code> method only behaves differently when the object is not present in the storr, in which case it will try to fetch the object and insert it into the storr.</p>
 <p>At first there is nothing in here:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">list</span>()</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">st<span class="op">$</span><span class="kw">list</span>()</a></code></pre></div>
 <pre><code>## character(0)</code></pre>
 <p>But we can still <code>get</code> things from the storr:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">d &lt;-<span class="st"> </span>st$<span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">d &lt;-<span class="st"> </span>st<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>)</a></code></pre></div>
 <p>Once a key has been fetched, it will be retrieved locally:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(st$<span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>), d)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">identical</span>(st<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>), d)</a></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>And it will be present within the storr, as shown by <code>list</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st$<span class="kw">list</span>()</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">st<span class="op">$</span><span class="kw">list</span>()</a></code></pre></div>
 <pre><code>## [1] &quot;richfitz/storr&quot;</code></pre>
 <p>If an external resource cannot be located, storr will throw an error of class <code>KeyErrorExternal</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tryCatch</span>(st$<span class="kw">get</span>(<span class="st">&quot;richfitz/no_such_repo&quot;</span>),
-         <span class="dt">KeyErrorExternal =</span> function(e)
-           <span class="kw">message</span>(<span class="kw">sprintf</span>(<span class="st">&quot;** Repository %s not found&quot;</span>, e$key)))</code></pre></div>
-<pre><code>## Warning in download.file(sprintf(fmt, key), path, mode = &quot;wb&quot;): cannot
-## open URL 'https://raw.githubusercontent.com/richfitz/no_such_repo/master/
-## DESCRIPTION': HTTP status was '404 Not Found'</code></pre>
-<pre><code>## Warning in file.remove(path): cannot remove file '/var/folders/3z/
-## 86tv450j7kb4w5y4wpxj6d5r0000gn/T//RtmppwojCb/gh_description_47e77328d853',
-## reason 'No such file or directory'</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">tryCatch</span>(st<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;richfitz/no_such_repo&quot;</span>),</a>
+<a class="sourceLine" id="cb11-2" title="2">         <span class="dt">KeyErrorExternal =</span> <span class="cf">function</span>(e)</a>
+<a class="sourceLine" id="cb11-3" title="3">           <span class="kw">message</span>(<span class="kw">sprintf</span>(<span class="st">&quot;** Repository %s not found&quot;</span>, e<span class="op">$</span>key)))</a></code></pre></div>
+<pre><code>## Warning in download.file(sprintf(fmt, key), path, mode = &quot;wb&quot;): cannot open URL
+## &#39;https://raw.githubusercontent.com/richfitz/no_such_repo/master/DESCRIPTION&#39;:
+## HTTP status was &#39;404 Not Found&#39;</code></pre>
+<pre><code>## Warning in file.remove(path): cannot remove file &#39;/var/folders/z7/
+## c2kx_kt96zn2tt_6179bkc4m0000gp/T//Rtmpj9rmQI/gh_description_1309672b9f4fa&#39;,
+## reason &#39;No such file or directory&#39;</code></pre>
 <pre><code>## ** Repository richfitz/no_such_repo not found</code></pre>
 <p>This would happen for all errors, including lack of internet connectivity, corrupt file downloads, etc. The original error will be returned as the <code>$e</code> element of the error if you need to distinguish between types of failure. The <code>KeyErrorExternal</code> is also a <code>KeyError</code> class, so code that catches <code>KeyErrors</code> will still work as expected.</p>
 <p>For more details on storr exception handling, see the <code>storr</code> vignette (<code>vignette(&quot;storr&quot;, package = &quot;storr&quot;)</code>)</p>
 <p>Note that if you want to persist the storage of the descriptions you would need to mangle the key:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st_rds &lt;-<span class="st"> </span>st$<span class="kw">export</span>(storr::<span class="kw">storr_rds</span>(<span class="kw">tempfile</span>(), <span class="dt">mangle_key =</span> <span class="ot">TRUE</span>))
-st_rds$<span class="kw">list</span>()</code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">st_rds &lt;-<span class="st"> </span>st<span class="op">$</span><span class="kw">export</span>(storr<span class="op">::</span><span class="kw">storr_rds</span>(<span class="kw">tempfile</span>(), <span class="dt">mangle_key =</span> <span class="ot">TRUE</span>))</a>
+<a class="sourceLine" id="cb15-2" title="2">st_rds<span class="op">$</span><span class="kw">list</span>()</a></code></pre></div>
 <pre><code>## [1] &quot;richfitz/storr&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st_rds$<span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>)$Version</code></pre></div>
-<pre><code>## [1] &quot;1.2.1&quot;</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">st_rds<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;richfitz/storr&quot;</span>)<span class="op">$</span>Version</a></code></pre></div>
+<pre><code>## [1] &quot;1.2.2&quot;</code></pre>
 <p>The <code>st_rds</code> storr does not include the fetch hook; it is a plain storr.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st_rds$<span class="kw">destroy</span>()</code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">st_rds<span class="op">$</span><span class="kw">destroy</span>()</a></code></pre></div>
 <div id="memoisation" class="section level1">
 <h1>Memoisation</h1>
 <p>The external storr can support a form of memoisation, though it might be simpler to implement this directly (see below).</p>
 <p>Suppose you have some expensive function <code>f(a, b)</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f &lt;-<span class="st"> </span>function(a, b) {
-  <span class="kw">message</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Computing f(%.3f, %.3f)&quot;</span>, a, b))
-  ## ...expensive computation here...
-  <span class="kw">list</span>(a, b)
-}</code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">f &lt;-<span class="st"> </span><span class="cf">function</span>(a, b) {</a>
+<a class="sourceLine" id="cb20-2" title="2">  <span class="kw">message</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Computing f(%.3f, %.3f)&quot;</span>, a, b))</a>
+<a class="sourceLine" id="cb20-3" title="3">  <span class="co">## ...expensive computation here...</span></a>
+<a class="sourceLine" id="cb20-4" title="4">  <span class="kw">list</span>(a, b)</a>
+<a class="sourceLine" id="cb20-5" title="5">}</a></code></pre></div>
 <p>and a set of parameters to run the function over, with each parameter set (row) associated with an id:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pars &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="kw">as.character</span>(<span class="dv">1</span>:<span class="dv">10</span>), <span class="dt">a =</span> <span class="kw">runif</span>(<span class="dv">10</span>), <span class="dt">b =</span> <span class="kw">runif</span>(<span class="dv">10</span>),
-                   <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">pars &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="kw">as.character</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>), <span class="dt">a =</span> <span class="kw">runif</span>(<span class="dv">10</span>), <span class="dt">b =</span> <span class="kw">runif</span>(<span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb21-2" title="2">                   <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <p>The <code>hook</code> here simply looks the parameters up and arranges to run them:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">hook &lt;-<span class="st"> </span>function(key, namespace) {
-  p &lt;-<span class="st"> </span>pars[<span class="kw">match</span>(key, pars$id), -<span class="dv">1</span>]
-  <span class="kw">f</span>(p$a, p$b)
-}
-
-st &lt;-<span class="st"> </span>storr::<span class="kw">storr_external</span>(storr::<span class="kw">driver_environment</span>(), hook)</code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">hook &lt;-<span class="st"> </span><span class="cf">function</span>(key, namespace) {</a>
+<a class="sourceLine" id="cb22-2" title="2">  p &lt;-<span class="st"> </span>pars[<span class="kw">match</span>(key, pars<span class="op">$</span>id), <span class="dv">-1</span>]</a>
+<a class="sourceLine" id="cb22-3" title="3">  <span class="kw">f</span>(p<span class="op">$</span>a, p<span class="op">$</span>b)</a>
+<a class="sourceLine" id="cb22-4" title="4">}</a>
+<a class="sourceLine" id="cb22-5" title="5"></a>
+<a class="sourceLine" id="cb22-6" title="6">st &lt;-<span class="st"> </span>storr<span class="op">::</span><span class="kw">storr_external</span>(storr<span class="op">::</span><span class="kw">driver_environment</span>(), hook)</a></code></pre></div>
 <p>The first time the result is retrieved the message will be printed (the function is evaluated)</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>st$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>)</code></pre></div>
-<pre><code>## Computing f(0.504, 0.732)</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">x &lt;-<span class="st"> </span>st<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;1&quot;</span>)</a></code></pre></div>
+<pre><code>## Computing f(0.452, 0.938)</code></pre>
 <p>The second time, it will not be as the result is retrieved from the storr:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(st$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>), x)</code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"><span class="kw">identical</span>(st<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;1&quot;</span>), x)</a></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>This idea can be generalised by storing the <em>parameters</em> and the <em>functions</em> in the storr so that we lose the dependency on the global variables:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">st &lt;-<span class="st"> </span>storr::<span class="kw">storr_environment</span>()
-st$<span class="kw">set</span>(<span class="st">&quot;experiment1&quot;</span>, pars, <span class="dt">namespace =</span> <span class="st">&quot;parameters&quot;</span>)
-st$<span class="kw">set</span>(<span class="st">&quot;experiment1&quot;</span>, f, <span class="dt">namespace =</span> <span class="st">&quot;functions&quot;</span>)
-
-hook2 &lt;-<span class="st"> </span>function(key, namespace) {
-  f &lt;-<span class="st"> </span>st$<span class="kw">get</span>(namespace, <span class="dt">namespace =</span> <span class="st">&quot;functions&quot;</span>)
-  pars &lt;-<span class="st"> </span>st$<span class="kw">get</span>(namespace, <span class="dt">namespace =</span> <span class="st">&quot;parameters&quot;</span>)
-  p &lt;-<span class="st"> </span>pars[<span class="kw">match</span>(key, pars$id), -<span class="dv">1</span>]
-  <span class="kw">f</span>(p$a, p$b)
-}
-
-st_use &lt;-<span class="st"> </span>storr::<span class="kw">storr_external</span>(st$driver, hook2)
-
-x1 &lt;-<span class="st"> </span>st_use$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</code></pre></div>
-<pre><code>## Computing f(0.504, 0.732)</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x2 &lt;-<span class="st"> </span>st_use$<span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">st &lt;-<span class="st"> </span>storr<span class="op">::</span><span class="kw">storr_environment</span>()</a>
+<a class="sourceLine" id="cb27-2" title="2">st<span class="op">$</span><span class="kw">set</span>(<span class="st">&quot;experiment1&quot;</span>, pars, <span class="dt">namespace =</span> <span class="st">&quot;parameters&quot;</span>)</a>
+<a class="sourceLine" id="cb27-3" title="3">st<span class="op">$</span><span class="kw">set</span>(<span class="st">&quot;experiment1&quot;</span>, f, <span class="dt">namespace =</span> <span class="st">&quot;functions&quot;</span>)</a>
+<a class="sourceLine" id="cb27-4" title="4"></a>
+<a class="sourceLine" id="cb27-5" title="5">hook2 &lt;-<span class="st"> </span><span class="cf">function</span>(key, namespace) {</a>
+<a class="sourceLine" id="cb27-6" title="6">  f &lt;-<span class="st"> </span>st<span class="op">$</span><span class="kw">get</span>(namespace, <span class="dt">namespace =</span> <span class="st">&quot;functions&quot;</span>)</a>
+<a class="sourceLine" id="cb27-7" title="7">  pars &lt;-<span class="st"> </span>st<span class="op">$</span><span class="kw">get</span>(namespace, <span class="dt">namespace =</span> <span class="st">&quot;parameters&quot;</span>)</a>
+<a class="sourceLine" id="cb27-8" title="8">  p &lt;-<span class="st"> </span>pars[<span class="kw">match</span>(key, pars<span class="op">$</span>id), <span class="dv">-1</span>]</a>
+<a class="sourceLine" id="cb27-9" title="9">  <span class="kw">f</span>(p<span class="op">$</span>a, p<span class="op">$</span>b)</a>
+<a class="sourceLine" id="cb27-10" title="10">}</a>
+<a class="sourceLine" id="cb27-11" title="11"></a>
+<a class="sourceLine" id="cb27-12" title="12">st_use &lt;-<span class="st"> </span>storr<span class="op">::</span><span class="kw">storr_external</span>(st<span class="op">$</span>driver, hook2)</a>
+<a class="sourceLine" id="cb27-13" title="13"></a>
+<a class="sourceLine" id="cb27-14" title="14">x1 &lt;-<span class="st"> </span>st_use<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</a></code></pre></div>
+<pre><code>## Computing f(0.452, 0.938)</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">x2 &lt;-<span class="st"> </span>st_use<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;experiment1&quot;</span>)</a></code></pre></div>
 <p>Memoisation in the style of the <code>memoise</code> package is possible to implement, but is not provided in the package. Implementation is straightforward and will work with any driver:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">memoise &lt;-<span class="st"> </span>function(f, <span class="dt">driver =</span> storr::<span class="kw">driver_environment</span>()) {
-  <span class="kw">force</span>(f)
-  st &lt;-<span class="st"> </span>storr::<span class="kw">storr</span>(driver)
-  function(...) {
-    ## NOTE: also digesting the inputs as a key here (in addition to
-    ## storr's usual digesting of values)
-    key &lt;-<span class="st"> </span>digest::<span class="kw">digest</span>(<span class="kw">list</span>(...))
-    <span class="kw">tryCatch</span>(
-      st$<span class="kw">get</span>(key),
-      <span class="dt">KeyError =</span> function(e) {
-        ans &lt;-<span class="st"> </span><span class="kw">f</span>(...)
-        st$<span class="kw">set</span>(key, ans)
-        ans
-      })
-  }
-}</code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1">memoise &lt;-<span class="st"> </span><span class="cf">function</span>(f, <span class="dt">driver =</span> storr<span class="op">::</span><span class="kw">driver_environment</span>()) {</a>
+<a class="sourceLine" id="cb30-2" title="2">  <span class="kw">force</span>(f)</a>
+<a class="sourceLine" id="cb30-3" title="3">  st &lt;-<span class="st"> </span>storr<span class="op">::</span><span class="kw">storr</span>(driver)</a>
+<a class="sourceLine" id="cb30-4" title="4">  <span class="cf">function</span>(...) {</a>
+<a class="sourceLine" id="cb30-5" title="5">    <span class="co">## </span><span class="al">NOTE</span><span class="co">: also digesting the inputs as a key here (in addition to</span></a>
+<a class="sourceLine" id="cb30-6" title="6">    <span class="co">## storr&#39;s usual digesting of values)</span></a>
+<a class="sourceLine" id="cb30-7" title="7">    key &lt;-<span class="st"> </span>digest<span class="op">::</span><span class="kw">digest</span>(<span class="kw">list</span>(...))</a>
+<a class="sourceLine" id="cb30-8" title="8">    <span class="kw">tryCatch</span>(</a>
+<a class="sourceLine" id="cb30-9" title="9">      st<span class="op">$</span><span class="kw">get</span>(key),</a>
+<a class="sourceLine" id="cb30-10" title="10">      <span class="dt">KeyError =</span> <span class="cf">function</span>(e) {</a>
+<a class="sourceLine" id="cb30-11" title="11">        ans &lt;-<span class="st"> </span><span class="kw">f</span>(...)</a>
+<a class="sourceLine" id="cb30-12" title="12">        st<span class="op">$</span><span class="kw">set</span>(key, ans)</a>
+<a class="sourceLine" id="cb30-13" title="13">        ans</a>
+<a class="sourceLine" id="cb30-14" title="14">      })</a>
+<a class="sourceLine" id="cb30-15" title="15">  }</a>
+<a class="sourceLine" id="cb30-16" title="16">}</a></code></pre></div>
 <p>Here’s a function that will print when it is evaluated</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f &lt;-<span class="st"> </span>function(x) {
-  <span class="kw">message</span>(<span class="st">&quot;computing...&quot;</span>)
-  x *<span class="st"> </span><span class="dv">2</span>
-}</code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb31-2" title="2">  <span class="kw">message</span>(<span class="st">&quot;computing...&quot;</span>)</a>
+<a class="sourceLine" id="cb31-3" title="3">  x <span class="op">*</span><span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb31-4" title="4">}</a></code></pre></div>
 <p>Create the memoised function</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">g &lt;-<span class="st"> </span><span class="kw">memoise</span>(f)</code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" title="1">g &lt;-<span class="st"> </span><span class="kw">memoise</span>(f)</a></code></pre></div>
 <p>The first time an argument is seen, <code>f()</code> will be run, printing a message</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">g</span>(<span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">g</span>(<span class="dv">1</span>)</a></code></pre></div>
 <pre><code>## computing...</code></pre>
 <pre><code>## [1] 2</code></pre>
 <p>Subsequent times will be looked up from the storr:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">g</span>(<span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">g</span>(<span class="dv">1</span>)</a></code></pre></div>
 <pre><code>## [1] 2</code></pre>
 <p>Storr takes about twice as long as memoise (memoise does a direct key-&gt;value mapping rather than going through hashed values because it is the only thing that ever touches its cache). However, the overhead is approximately half of one call to <code>message()</code> so it’s not that bad.</p>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
